@@ -1,0 +1,21 @@
+{
+  "idProg": null,
+  "titre": "{Mois initial-mois final}",
+  "dateFrom": "",
+  "dateTo": "",
+  "cycles": [{
+    "idCycleProg": null,
+    "titreCycle": "{Titre cycle}",
+    "sousCycles": [{
+        "titre": "{Titre sous-cycle1}",
+        "cats": [],
+        "tri": 1
+      },
+      {
+        "titre": "{Titre sous-cycle2}",
+        "cats": [],
+        "tri": 4
+      }
+    ]
+  }]
+}

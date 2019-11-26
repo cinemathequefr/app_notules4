@@ -1,0 +1,23 @@
+{
+  "name": "app_notules3",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {},
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cheerio": "^1.0.0-rc.3",
+    "glob": "^7.1.4",
+    "html-entities": "^1.2.1",
+    "html-minifier": "^4.0.0",
+    "iconv-lite": "^0.5.00",
+    "lodash": "^4.17.15",
+    "moment": "^2.23.0",
+    "node-firebird": "^0.8.6",
+    "p-all": "^2.1.0",
+    "p-queue": "^3.0.0",
+    "request-promise": "^4.2.2",
+    "turndown": "^5.0.1"
+  },
+  "description": ""
+}

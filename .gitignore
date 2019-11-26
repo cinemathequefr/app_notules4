@@ -1,0 +1,17 @@
+lib/config.js
+#lib/queries.js
+
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# Dependency directories
+node_modules/
+
+.npm
+.eslintcache
+.node_repl_history
+*.tgz
+.env
+.next
