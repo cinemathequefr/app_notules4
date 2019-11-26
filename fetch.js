@@ -35,7 +35,8 @@ try {
 // TODO: vérification de l'existence du répertoire du programme (sinon erreur et suggérer d'exécuter le script init)
 
 (async function() {
-  let progConfig = await helpers.fetchProgConfig(idProg);
+  let progConfig = await helpers.fetchProgConfig(idProg, config.pathDataConfig);
+  // let progConfig = await helpers.fetchProgConfig(idProg);
   let cycleConfig = helpers.cycleConfig(progConfig, idCycle);
   let progDirectoryName = helpers.getFullCode.prog(progConfig).join(" "); // Nom du répertoire du programme
   let cycleFullCode = helpers.getFullCode.cycle(progConfig, idCycle);
@@ -62,13 +63,13 @@ try {
         "utf8"
       );
 
-      // 2019-11-18 : On compare ces données avec celles d'un éventuel fichier _FILM_DEF.json pour voir s'il y a des films supplémentaires.
+      // 2019-11-18 : On compare ces données avec celles d'un éventuel fichier _FILM_EDIT.json pour voir s'il y a des films supplémentaires.
       // Si c'est le cas, un fichier _FILMS_ADD.json contenant les ajouts est écrit.
       try {
         let f_def = await helpers.readFileAsJson(
           `${config.pathData.remote}/${progDirectoryName}`,
           `${cycleFullCode[0]} ${cycleFullCode[1]}/editable`,
-          `${cycleFullCode[0]}_FILMS_DEF ${cycleFullCode[1]}.json`
+          `${cycleFullCode[0]}_FILMS_EDIT ${cycleFullCode[1]}.json`
         );
 
         let f_additions = _.differenceBy(f, f_def, "idFilm");
