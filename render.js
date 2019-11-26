@@ -72,7 +72,7 @@ try {
     confs = await helpers.readFileAsJson(
       `${config.pathData.remote}/${progDirectoryName}`,
       `${cycleFullCode[0]} ${cycleFullCode[1]}/editable`,
-      `${cycleFullCode[0]}_CONFS_DEF ${cycleFullCode[1]}.json`
+      `${cycleFullCode[0]}_CONFS_EDIT ${cycleFullCode[1]}.json`
     );
     console.log("Info : utilise les données CONFS_EDIT.");
   } catch (e) {

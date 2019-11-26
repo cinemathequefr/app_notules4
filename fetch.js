@@ -36,7 +36,6 @@ try {
 
 (async function() {
   let progConfig = await helpers.fetchProgConfig(idProg, config.pathDataConfig);
-  // let progConfig = await helpers.fetchProgConfig(idProg);
   let cycleConfig = helpers.cycleConfig(progConfig, idCycle);
   let progDirectoryName = helpers.getFullCode.prog(progConfig).join(" "); // Nom du répertoire du programme
   let cycleFullCode = helpers.getFullCode.cycle(progConfig, idCycle);
