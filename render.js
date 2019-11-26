@@ -44,13 +44,13 @@ try {
   );
 
   // Lecture des données films
-  // On cherche en priorité le fichier _FILMS_DEF.json sur distant
+  // On cherche en priorité le fichier _FILMS_EDIT.json
   // A défaut, on prend le fichier _FILMS.json sur local (données non définitives)
   try {
     films = await helpers.readFileAsJson(
       `${config.pathData.remote}/${progDirectoryName}`,
       `${cycleFullCode[0]} ${cycleFullCode[1]}/editable`,
-      `${cycleFullCode[0]}_FILMS_DEF ${cycleFullCode[1]}.json`
+      `${cycleFullCode[0]}_FILMS_EDIT ${cycleFullCode[1]}.json`
     );
     isDef = true;
   } catch (e) {
@@ -62,21 +62,19 @@ try {
       );
       isDef = false;
     } catch (e) {
-      console.log(e); // Erreur fatale : ni _FILMS_DEF.json, ni _FILMS.json n'ont été trouvés
+      console.log(e); // Erreur fatale : ni _FILMS_EDIT.json, ni _FILMS.json n'ont été trouvés
       process.exit(1); // Faut-il sortir du process ou continuer sans films ?
     }
   }
 
   // Lecture des données _CONFS
-  // NOTE : en l'absence de données, le script continue.
-  // TODO: voir comment gérer le statut _DEF pour la sortie. Je postule pour le moment qu'il reste déterminé par celui des films uniquement.
   try {
     confs = await helpers.readFileAsJson(
       `${config.pathData.remote}/${progDirectoryName}`,
       `${cycleFullCode[0]} ${cycleFullCode[1]}/editable`,
       `${cycleFullCode[0]}_CONFS_DEF ${cycleFullCode[1]}.json`
     );
-    console.log("Info : utilise les données CONFS_DEF.");
+    console.log("Info : utilise les données CONFS_EDIT.");
   } catch (e) {
     try {
       confs = await helpers.readFileAsJson(
@@ -84,7 +82,7 @@ try {
         `${cycleFullCode[0]} ${cycleFullCode[1]}/generated`,
         `${cycleFullCode[0]}_CONFS ${cycleFullCode[1]}.json`
       );
-      console.log("Info : utilise les données CONFS (non _DEF).");
+      console.log("Info : utilise les données CONFS (non _EDIT).");
     } catch (e) {
       console.log("Info : aucune donnée _CONFS n'a  été trouvée.");
     }
@@ -95,9 +93,9 @@ try {
     texts = await helpers.readFileAsJson(
       `${config.pathData.remote}/${progDirectoryName}`,
       `${cycleFullCode[0]} ${cycleFullCode[1]}/editable`,
-      `${cycleFullCode[0]}_TEXTS_DEF ${cycleFullCode[1]}.json`
+      `${cycleFullCode[0]}_TEXTS_EDIT ${cycleFullCode[1]}.json`
     );
-    console.log("Info : utilise les données TEXTS_DEF.");
+    console.log("Info : utilise les données TEXTS_EDIT.");
   } catch (e) {
     try {
       texts = await helpers.readFileAsJson(
@@ -105,7 +103,7 @@ try {
         `${cycleFullCode[0]} ${cycleFullCode[1]}/generated`,
         `${cycleFullCode[0]}_TEXTS ${cycleFullCode[1]}.json`
       );
-      console.log("Info : utilise les données TEXTS (non _DEF).");
+      console.log("Info : utilise les données TEXTS (non _EDIT).");
     } catch (e) {
       console.log("Info : aucune donnée _TEXTS n'a  été trouvée.");
     }

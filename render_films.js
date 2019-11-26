@@ -42,10 +42,10 @@ try {
     films = await helpers.readFileAsJson(
       `${config.pathData.remote}/${progDirectoryName}`,
       `${cycleFullCode[0]} ${cycleFullCode[1]}/editable`,
-      `${cycleFullCode[0]}_FILMS_DEF ${cycleFullCode[1]}.json`
+      `${cycleFullCode[0]}_FILMS_EDIT ${cycleFullCode[1]}.json`
     );
     isDef = true;
-    console.log("Un fichier _FILMS_DEF.json a été trouvé.");
+    console.log("Un fichier _FILMS_EDIT.json a été trouvé.");
   } catch (e) {
     try {
       films = await helpers.readFileAsJson(
@@ -57,7 +57,7 @@ try {
       console.log("Un fichier _FILMS.json a été trouvé.");
     } catch (e) {
       console.log(
-        "Échec : fichier _FILMS.json ou _FILMS_DEF.json non trouvé. Exécuter d'abord le script `fetch -f` pour obtenir ces données."
+        "Échec : fichier _FILMS.json ou _FILMS_EDIT.json non trouvé. Exécuter d'abord le script `fetch -f` pour obtenir ces données."
       );
       process.exit(0);
     }
@@ -91,9 +91,7 @@ try {
   await helpers.writeFileInFolder(
     `${config.pathData.remote}/${progDirectoryName}`,
     `${cycleFullCode[0]} ${cycleFullCode[1]}`,
-    `${cycleFullCode[0]}_FILMS${isDef ? "_DEF_FINAL" : ""} ${
-      cycleFullCode[1]
-    }.md`,
+    `${cycleFullCode[0]}_FILMS${isDef ? "_DEF" : ""} ${cycleFullCode[1]}.md`,
     md,
     "utf8"
   );
