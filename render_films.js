@@ -3,17 +3,14 @@ const _ = require("lodash");
 const cheerio = require("cheerio");
 const helpers = require("./lib/helpers.js");
 const format = require("./lib/format.js");
-const config = require("./lib/config.js");
+const config = {
+  main: require("./config/main.js"),
+  access: require("./config/access.js")
+};
 const markdownFilms = require("./lib/transforms/markdown_films.js");
 const scraper = require("./lib/scraper.js");
-const turndownService = new require("turndown")({
-  headingStyle: "atx",
-  hr: "---",
-  bulletListMarker: "-",
-  codeBlockStyle: "indented",
-  emDelimiter: "_",
-  strongDelimiter: "**"
-});
+const turndownService = new require("turndown")(config.main.turndown);
+const basePath = config.access.pathData.remote;
 
 try {
   let args = helpers.extractArgsValue(process.argv.slice(2).join(" "));
@@ -40,7 +37,7 @@ try {
 
   try {
     films = await helpers.readFileAsJson(
-      `${config.pathData.remote}/${progDirectoryName}`,
+      `${basePath}/${progDirectoryName}`,
       `${cycleFullCode[0]} ${cycleFullCode[1]}/editable`,
       `${cycleFullCode[0]}_FILMS_EDIT ${cycleFullCode[1]}.json`
     );
@@ -49,7 +46,7 @@ try {
   } catch (e) {
     try {
       films = await helpers.readFileAsJson(
-        `${config.pathData.remote}/${progDirectoryName}`,
+        `${basePath}/${progDirectoryName}`,
         `${cycleFullCode[0]} ${cycleFullCode[1]}/generated`,
         `${cycleFullCode[0]}_FILMS ${cycleFullCode[1]}.json`
       );
@@ -89,7 +86,7 @@ try {
   });
 
   await helpers.writeFileInFolder(
-    `${config.pathData.remote}/${progDirectoryName}`,
+    `${basePath}/${progDirectoryName}`,
     `${cycleFullCode[0]} ${cycleFullCode[1]}`,
     `${cycleFullCode[0]}_FILMS${isDef ? "_DEF" : ""} ${cycleFullCode[1]}.md`,
     md,
@@ -98,7 +95,7 @@ try {
 
   if (isDef) {
     let success = await helpers.deleteFile(
-      `${config.pathData.remote}/${progDirectoryName}`,
+      `${basePath}/${progDirectoryName}`,
       `${cycleFullCode[0]} ${cycleFullCode[1]}`,
       `${cycleFullCode[0]}_FILMS ${cycleFullCode[1]}.md`
     );

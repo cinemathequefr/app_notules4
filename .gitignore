@@ -1,12 +1,10 @@
-lib/config.js
-#lib/queries.js
+config/access.js
+# lib/queries.js
 
-# Logs
 logs
 *.log
 npm-debug.log*
 
-# Dependency directories
 node_modules/
 
 .npm

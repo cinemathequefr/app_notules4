@@ -4,10 +4,14 @@
  */
 const _ = require("lodash");
 const helpers = require("./lib/helpers.js");
-const config = require("./lib/config.js");
-const moment = require("moment");
+const config = {
+  main: require("./config/main.js"),
+  access: require("./config/access.js")
+};
+const basePath = config.access.pathData.remote;
 
-moment.locale("fr", require("./lib/config.js").momentLocale.fr);
+const moment = require("moment");
+moment.locale("fr", config.main.momentLocale.fr);
 
 try {
   let args = helpers.extractArgsValue(process.argv.slice(2).join(" "));
@@ -18,30 +22,41 @@ try {
   );
 }
 
-(async function () {
+(async function() {
   let progConfig = await helpers.fetchProgConfig(idProg);
   let progDirectoryName = helpers.getFullCode.prog(progConfig).join(" "); // Nom du répertoire du programme
 
   let cycles = _(progConfig)
     .thru(d =>
       _(d.cycles)
-      .map(e => e.idCycleProg)
-      .value()
+        .map(e => e.idCycleProg)
+        .value()
     )
     .value();
 
-
-  let dates = _(cycles).map(async c => {
+  let dates = _(cycles)
+    .map(async c => {
       let cycleFullCode = helpers.getFullCode.cycle(progConfig, c);
+
       try {
-        seances = await helpers.readFileAsJson(`${config.pathData.local}${progDirectoryName}/${cycleFullCode[0]}_SEANCES ${cycleFullCode[1]}.json`);
+        seances = await helpers.readFileAsJson(
+          `${basePath}/${progDirectoryName}`,
+          `${cycleFullCode[0]} ${cycleFullCode[1]}/generated`,
+          `${cycleFullCode[0]}_SEANCES ${cycleFullCode[1]}.json`
+        );
+
+        console.log(seances);
         let dates = _(seances)
           .orderBy(d => d.dateHeure)
-          .thru(d => [cycleFullCode[1], _.first(d).dateHeure, _.last(d).dateHeure])
+          .thru(d => [
+            cycleFullCode[1],
+            _.first(d).dateHeure,
+            _.last(d).dateHeure
+          ])
           .value();
-        return (dates);
+        return dates;
       } catch (e) {
-        return ([cycleFullCode[1], null]);
+        return [cycleFullCode[1], null];
       }
     })
     .value();
@@ -52,11 +67,12 @@ try {
     .sortBy(d => d[1])
     .value();
 
-
-  console.log(_.template("<% _.forEach(dates, d => { %>- <%= d[0] %> : <%= moment(d[1]).format('ddd D MMM') %> - <%= moment(d[2]).format('ddd D MMM') %>\n<% }) %>")({
-    dates: dates,
-    moment: moment
-
-  }));
-
+  console.log(
+    _.template(
+      "<% _.forEach(dates, d => { %>- <%= d[0] %> : <%= moment(d[1]).format('ddd D MMM') %> - <%= moment(d[2]).format('ddd D MMM') %>\n<% }) %>"
+    )({
+      dates: dates,
+      moment: moment
+    })
+  );
 })();
