@@ -2,14 +2,17 @@ const fs = require("fs");
 const _ = require("lodash");
 const { promisify } = require("util");
 const helpers = require("./lib/helpers.js");
-const format = require("./lib/format.js");
+// const format = require("./lib/format.js");
+const config = {
+  access: require("./config/access.js")
+};
 const doMerge = require("./lib/transforms/merge.js");
 // const cleanTitreEvenement = require("./lib/transforms/clean_titre_evenement.js");
 const doRender = require("./lib/transforms/render.js");
 const doMarkdown = require("./lib/transforms/markdown.js");
 const doTaggedText = require("./lib/transforms/tt.js");
 
-const basePath = require("./config/access.js").pathData.remote;
+const basePath = config.access.pathData.remote;
 
 try {
   let args = helpers.extractArgsValue(process.argv.slice(2).join(" "));
@@ -22,7 +25,10 @@ try {
 }
 
 (async function() {
-  let progConfig = await helpers.fetchProgConfig(idProg, config.pathDataConfig);
+  let progConfig = await helpers.fetchProgConfig(
+    idProg,
+    config.access.pathDataConfig
+  );
   let cycleConfig = helpers.cycleConfig(progConfig, idCycle);
   let progDirectoryName = helpers.getFullCode.prog(progConfig).join(" "); // Nom du répertoire du programme
   let cycleFullCode = helpers.getFullCode.cycle(progConfig, idCycle);
