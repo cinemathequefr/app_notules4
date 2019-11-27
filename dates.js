@@ -4,10 +4,14 @@
  */
 const _ = require("lodash");
 const helpers = require("./lib/helpers.js");
-const config = require("./lib/config.js");
-const moment = require("moment");
+const config = {
+  main: require("./config/main.js"),
+  access: require("./config/access.js")
+};
+const basePath = config.access.pathData.remote;
 
-moment.locale("fr", require("./lib/config.js").momentLocale.fr);
+const moment = require("moment");
+moment.locale("fr", config.main.momentLocale.fr);
 
 try {
   let args = helpers.extractArgsValue(process.argv.slice(2).join(" "));
@@ -33,12 +37,14 @@ try {
   let dates = _(cycles)
     .map(async c => {
       let cycleFullCode = helpers.getFullCode.cycle(progConfig, c);
+
       try {
         seances = await helpers.readFileAsJson(
-          `${config.pathData.remote}/${progDirectoryName}`,
+          `${basePath}/${progDirectoryName}`,
           `${cycleFullCode[0]} ${cycleFullCode[1]}/generated`,
           `${cycleFullCode[0]}_SEANCES ${cycleFullCode[1]}.json`
         );
+
         let dates = _(seances)
           .orderBy(d => d.dateHeure)
           .thru(d => [

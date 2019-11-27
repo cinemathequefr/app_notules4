@@ -5,7 +5,10 @@
 const fs = require("fs");
 const _ = require("lodash");
 const database = require("./lib/database");
-const config = require("./lib/config.js");
+const config = {
+  main: require("./config/main.js"),
+  access: require("./config/access.js")
+};
 const seances = require("./lib/query/seances.js");
 const films = require("./lib/query/films.js");
 const confs = require("./lib/query/confs.js");
@@ -41,7 +44,7 @@ try {
   let cycleFullCode = helpers.getFullCode.cycle(progConfig, idCycle);
 
   try {
-    const db = await database.attach(config.db);
+    const db = await database.attach(config.access.db);
 
     console.log(
       `Importation des données pour le cycle ${cycleFullCode.join(" ")}.`
@@ -55,7 +58,7 @@ try {
       console.log(`Films : ${_.map(f).length} items.`);
 
       await helpers.writeFileInFolder(
-        `${config.pathData.remote}/${progDirectoryName}`,
+        `${config.access.pathData.remote}/${progDirectoryName}`,
         `${cycleFullCode[0]} ${cycleFullCode[1]}/generated`,
         `${cycleFullCode[0]}_FILMS ${cycleFullCode[1]}.json`,
         JSON.stringify(f, null, 2),
@@ -66,7 +69,7 @@ try {
       // Si c'est le cas, un fichier _FILMS_ADD.json contenant les ajouts est écrit.
       try {
         let f_def = await helpers.readFileAsJson(
-          `${config.pathData.remote}/${progDirectoryName}`,
+          `${config.access.pathData.remote}/${progDirectoryName}`,
           `${cycleFullCode[0]} ${cycleFullCode[1]}/editable`,
           `${cycleFullCode[0]}_FILMS_EDIT ${cycleFullCode[1]}.json`
         );
@@ -75,7 +78,7 @@ try {
 
         if (f_additions.length > 0) {
           await helpers.writeFileInFolder(
-            `${config.pathData.remote}/${progDirectoryName}`,
+            `${config.access.pathData.remote}/${progDirectoryName}`,
             `${cycleFullCode[0]} ${cycleFullCode[1]}/generated`,
             `${cycleFullCode[0]}_FILMS_ADD ${cycleFullCode[1]}.json`,
             JSON.stringify(f_additions, null, 2),
@@ -94,7 +97,7 @@ try {
       let c = await confs(db, cycleConfig);
       console.log(`Conférences : ${_.map(c).length} items.`);
       await helpers.writeFileInFolder(
-        `${config.pathData.remote}/${progDirectoryName}`,
+        `${config.access.pathData.remote}/${progDirectoryName}`,
         `${cycleFullCode[0]} ${cycleFullCode[1]}/generated`,
         `${cycleFullCode[0]}_CONFS ${cycleFullCode[1]}.json`,
         JSON.stringify(c, null, 2),
@@ -119,7 +122,7 @@ try {
         } items.`
       );
       await helpers.writeFileInFolder(
-        `${config.pathData.remote}/${progDirectoryName}`,
+        `${config.access.pathData.remote}/${progDirectoryName}`,
         `${cycleFullCode[0]} ${cycleFullCode[1]}/generated`,
         `${cycleFullCode[0]}_TEXTS ${cycleFullCode[1]}.json`,
         JSON.stringify(t, null, 2),
@@ -134,7 +137,7 @@ try {
       console.log(`Séances : ${s.length} items.`);
 
       await helpers.writeFileInFolder(
-        `${config.pathData.remote}/${progDirectoryName}`,
+        `${config.access.pathData.remote}/${progDirectoryName}`,
         `${cycleFullCode[0]} ${cycleFullCode[1]}/generated`,
         `${cycleFullCode[0]}_SEANCES ${cycleFullCode[1]}.json`,
         JSON.stringify(s, null, 2),

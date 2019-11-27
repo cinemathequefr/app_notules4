@@ -1,8 +1,7 @@
 /**
  * Script d'initialisation d'un programme trimestriel
- * Nécessite l'existence d'un fichier de configuration "./config/PROG{idProg}.json" minimal.
- * Crée un répertoire de données (p. ex. "PROG61 Septembre-novembre 2019")  localement et sur constellation2
- * (les deux emplacements sont nécessaires car on n'y mettra pas les mêmes fichiers)
+ * Nécessite l'existence d'un fichier de configuration de cycle minimal correspondant à l'id passé en paramètre.
+ * Crée un répertoire de données (p. ex. "PROG61 Septembre-novembre 2019").
  */
 
 const fs = require("fs");
@@ -11,9 +10,7 @@ const helpers = require("./lib/helpers.js");
 const config = require("./lib/config.js");
 const { promisify } = require("util"); // https://stackoverflow.com/questions/40593875/using-filesystem-in-node-js-with-async-await
 const fp = _.noConflict();
-const mkdir = promisify(fs.mkdir);
-const pathData = require("./lib/config.js").pathData;
-// const glob = promisify(require("glob"));
+const basePaths = require("./config/access.js").pathData;
 
 let progConfig = {};
 let progFullCode = "";
@@ -33,12 +30,11 @@ try {
     progFullCode = helpers.getFullCode.prog(progConfig); // Code de la programmation, p. ex. ["PROG60", "Juin-juillet 2019"]
     progFullCode = progFullCode.join(" ");
     // Création des répertoires
-    // 2019-11-26 : `forEach` se justifiait par le fait que `pathData` avait plusieurs propriétés, pointant vers des emplacements à créer.
-    // Je ne change pas le code, mais `pathData` n'a plus que la propriété remote.
+    // 2019-11-26 : `forEach` se justifiait par le fait que `basePaths` avait plusieurs propriétés, pointant vers des emplacements à créer.
+    // Je ne change pas le code, mais `basePaths` n'a plus que la propriété `remote`.
     fp.forEach(async p => {
       try {
         await helpers.mkdirDeep(p, progFullCode);
-        // await mkdir(`${p}${progFullCode}`);
         console.log(
           `OK : Le répertoire "${progFullCode}" a été créé dans ${p}.`
         );
@@ -51,7 +47,7 @@ try {
           console.log(e);
         }
       }
-    })(pathData);
+    })(basePaths);
   } catch (e) {
     console.log("Erreur : l'initialisation a échoué.");
     console.log(e);

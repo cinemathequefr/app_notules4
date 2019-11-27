@@ -8,7 +8,8 @@ const doMerge = require("./lib/transforms/merge.js");
 const doRender = require("./lib/transforms/render.js");
 const doMarkdown = require("./lib/transforms/markdown.js");
 const doTaggedText = require("./lib/transforms/tt.js");
-const config = require("./lib/config.js");
+
+const basePath = require("./config/access.js").pathData.remote;
 
 try {
   let args = helpers.extractArgsValue(process.argv.slice(2).join(" "));
@@ -38,7 +39,7 @@ try {
 
   // Lecture des données séances
   seances = await helpers.readFileAsJson(
-    `${config.pathData.remote}/${progDirectoryName}`,
+    `${basePath}/${progDirectoryName}`,
     `${cycleFullCode[0]} ${cycleFullCode[1]}/generated`,
     `${cycleFullCode[0]}_SEANCES ${cycleFullCode[1]}.json`
   );
@@ -48,7 +49,7 @@ try {
   // A défaut, on prend le fichier _FILMS.json sur local (données non définitives)
   try {
     films = await helpers.readFileAsJson(
-      `${config.pathData.remote}/${progDirectoryName}`,
+      `${basePath}/${progDirectoryName}`,
       `${cycleFullCode[0]} ${cycleFullCode[1]}/editable`,
       `${cycleFullCode[0]}_FILMS_EDIT ${cycleFullCode[1]}.json`
     );
@@ -56,7 +57,7 @@ try {
   } catch (e) {
     try {
       films = await helpers.readFileAsJson(
-        `${config.pathData.remote}/${progDirectoryName}`,
+        `${basePath}/${progDirectoryName}`,
         `${cycleFullCode[0]} ${cycleFullCode[1]}/generated`,
         `${cycleFullCode[0]}_FILMS ${cycleFullCode[1]}.json`
       );
@@ -70,7 +71,7 @@ try {
   // Lecture des données _CONFS
   try {
     confs = await helpers.readFileAsJson(
-      `${config.pathData.remote}/${progDirectoryName}`,
+      `${basePath}/${progDirectoryName}`,
       `${cycleFullCode[0]} ${cycleFullCode[1]}/editable`,
       `${cycleFullCode[0]}_CONFS_EDIT ${cycleFullCode[1]}.json`
     );
@@ -78,7 +79,7 @@ try {
   } catch (e) {
     try {
       confs = await helpers.readFileAsJson(
-        `${config.pathData.remote}/${progDirectoryName}`,
+        `${basePath}/${progDirectoryName}`,
         `${cycleFullCode[0]} ${cycleFullCode[1]}/generated`,
         `${cycleFullCode[0]}_CONFS ${cycleFullCode[1]}.json`
       );
@@ -91,7 +92,7 @@ try {
   // Lecture des données _TEXTS
   try {
     texts = await helpers.readFileAsJson(
-      `${config.pathData.remote}/${progDirectoryName}`,
+      `${basePath}/${progDirectoryName}`,
       `${cycleFullCode[0]} ${cycleFullCode[1]}/editable`,
       `${cycleFullCode[0]}_TEXTS_EDIT ${cycleFullCode[1]}.json`
     );
@@ -99,7 +100,7 @@ try {
   } catch (e) {
     try {
       texts = await helpers.readFileAsJson(
-        `${config.pathData.remote}/${progDirectoryName}`,
+        `${basePath}/${progDirectoryName}`,
         `${cycleFullCode[0]} ${cycleFullCode[1]}/generated`,
         `${cycleFullCode[0]}_TEXTS ${cycleFullCode[1]}.json`
       );
@@ -114,7 +115,7 @@ try {
   // merge = cleanTitreEvenement(merge); // cf. 2019-10-03
 
   await helpers.writeFileInFolder(
-    `${config.pathData.remote}/${progDirectoryName}`,
+    `${basePath}/${progDirectoryName}`,
     `${cycleFullCode[0]} ${cycleFullCode[1]}/generated`,
     `${cycleFullCode[0]}_MERGE${isDef ? "_DEF" : ""} ${cycleFullCode[1]}.json`,
     JSON.stringify(merge, null, 2),
@@ -122,7 +123,7 @@ try {
   );
   if (isDef) {
     let success = await helpers.deleteFile(
-      `${config.pathData.remote}/${progDirectoryName}`,
+      `${basePath}/${progDirectoryName}`,
       `${cycleFullCode[0]} ${cycleFullCode[1]}/generated`,
       `${cycleFullCode[0]}_MERGE ${cycleFullCode[1]}.json`
     );
@@ -139,7 +140,7 @@ try {
     data: doRender(merge.data)
   };
   await helpers.writeFileInFolder(
-    `${config.pathData.remote}/${progDirectoryName}`,
+    `${basePath}/${progDirectoryName}`,
     `${cycleFullCode[0]} ${cycleFullCode[1]}/generated`,
     `${cycleFullCode[0]}_RENDER${isDef ? "_DEF" : ""} ${cycleFullCode[1]}.json`,
     JSON.stringify(render, null, 2),
@@ -147,7 +148,7 @@ try {
   );
   if (isDef) {
     let success = await helpers.deleteFile(
-      `${config.pathData.remote}/${progDirectoryName}`,
+      `${basePath}/${progDirectoryName}`,
       `${cycleFullCode[0]} ${cycleFullCode[1]}/generated`,
       `${cycleFullCode[0]}_RENDER ${cycleFullCode[1]}.json`
     );
@@ -161,7 +162,7 @@ try {
   // Conversion de _RENDER au format Markdown
   markdown = doMarkdown(render);
   await helpers.writeFileInFolder(
-    `${config.pathData.remote}/${progDirectoryName}`,
+    `${basePath}/${progDirectoryName}`,
     `${cycleFullCode[0]} ${cycleFullCode[1]}`,
     `${cycleFullCode[0]}_CYCLE${isDef ? "_DEF" : ""} ${cycleFullCode[1]}.md`,
     markdown,
@@ -169,7 +170,7 @@ try {
   );
   if (isDef) {
     let success = await helpers.deleteFile(
-      `${config.pathData.remote}/${progDirectoryName}`,
+      `${basePath}/${progDirectoryName}`,
       `${cycleFullCode[0]} ${cycleFullCode[1]}`,
       `${cycleFullCode[0]}_CYCLE ${cycleFullCode[1]}.md`
     );
@@ -183,7 +184,7 @@ try {
   // Conversion de _RENDER au format Tagged Text
   taggedText = doTaggedText(render);
   await helpers.writeFileInFolder(
-    `${config.pathData.remote}/${progDirectoryName}`,
+    `${basePath}/${progDirectoryName}`,
     `${cycleFullCode[0]} ${cycleFullCode[1]}`,
     `${cycleFullCode[0]}_CYCLE${isDef ? "_DEF" : ""} ${cycleFullCode[1]}.txt`,
     taggedText,
@@ -191,7 +192,7 @@ try {
   );
   if (isDef) {
     let success = await helpers.deleteFile(
-      `${config.pathData.remote}/${progDirectoryName}`,
+      `${basePath}/${progDirectoryName}`,
       `${cycleFullCode[0]} ${cycleFullCode[1]}`,
       `${cycleFullCode[0]}_CYCLE ${cycleFullCode[1]}.txt`
     );
