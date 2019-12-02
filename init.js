@@ -7,7 +7,9 @@
 const fs = require("fs");
 const _ = require("lodash/fp");
 const helpers = require("./lib/helpers.js");
-const config = require("./lib/config.js");
+const config = {
+  access: require("./config/access.js")
+};
 const { promisify } = require("util"); // https://stackoverflow.com/questions/40593875/using-filesystem-in-node-js-with-async-await
 const fp = _.noConflict();
 const basePaths = require("./config/access.js").pathData;
@@ -26,7 +28,10 @@ try {
 
 (async () => {
   try {
-    progConfig = await helpers.fetchProgConfig(idProg, config.pathDataConfig);
+    progConfig = await helpers.fetchProgConfig(
+      idProg,
+      config.access.pathDataConfig
+    );
     progFullCode = helpers.getFullCode.prog(progConfig); // Code de la programmation, p. ex. ["PROG60", "Juin-juillet 2019"]
     progFullCode = progFullCode.join(" ");
     // Création des répertoires
