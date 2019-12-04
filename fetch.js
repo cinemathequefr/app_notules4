@@ -13,6 +13,7 @@ const seances = require("./lib/query/seances.js");
 const films = require("./lib/query/films.js");
 const confs = require("./lib/query/confs.js");
 const texts = require("./lib/query/texts.js");
+const cats = require("./lib/query/cats.js"); // Requête de contrôle de cohérence des catégories
 
 const helpers = require("./lib/helpers.js");
 const { promisify } = require("util"); // https://stackoverflow.com/questions/40593875/using-filesystem-in-node-js-with-async-await
@@ -49,10 +50,32 @@ try {
   try {
     const db = await database.attach(config.access.db);
 
+    console.log("Connecté à la base de données.");
+
+    // Vérification de la cohérence des catégories
+    let catsListDb = await cats(db, cycleConfig);
+    let diffCats = _(catsListDb)
+      .differenceWith(
+        helpers.getIdCats(cycleConfig),
+        (e1, e2) => e1.idCategorie === e2
+      )
+      .map(e => `- ${_.values(e).join(" : ")}`)
+      .value()
+      .join("\n");
+
+    if (diffCats.length > 0) {
+      console.log(
+        `Avertissement : des catégories de ce cycle ne sont pas déclarées dans le fichier de configuration du cycle :\n${diffCats}\n`
+      );
+    } else {
+      console.log(
+        "Info : les catégories de ce cycle sont bien toutes déclarées dans le fichier de configuration du cycle."
+      );
+    }
+
     console.log(
       `Importation des données pour le cycle ${cycleFullCode.join(" ")}.`
     );
-    console.log("Connecté à la base de données.");
 
     // Films
     if (doFilms) {
