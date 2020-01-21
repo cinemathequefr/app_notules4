@@ -32,8 +32,9 @@ try {
   var doTexts = !_.isUndefined(args.t); // Flag `a` comme "action culturelle"
 } catch (e) {
   console.error(
-    "Erreur d'arguments. Les arguments attendus sont de la forme : -p <id programme> -c <id cycle>."
+    "ERREUR : Les arguments attendus sont de la forme : -p <id programme> -c <id cycle>."
   );
+  process.exit(1);
 }
 
 // TODO: vérification de l'existence du répertoire du programme (sinon erreur et suggérer d'exécuter le script init)
@@ -65,11 +66,11 @@ try {
 
     if (diffCats.length > 0) {
       console.log(
-        `Avertissement : des catégories de ce cycle ne sont pas déclarées dans le fichier de configuration du cycle :\n${diffCats}\n`
+        `AVERTISSEMENT : des catégories de ce cycle ne sont pas déclarées dans le fichier de configuration du cycle :\n${diffCats}\n`
       );
     } else {
       console.log(
-        "Info : les catégories de ce cycle sont bien toutes déclarées dans le fichier de configuration du cycle."
+        "INFO : les catégories de ce cycle sont bien toutes déclarées dans le fichier de configuration du cycle."
       );
     }
 
@@ -91,7 +92,7 @@ try {
         "utf8"
       );
 
-      // 2019-11-18 : On compare ces données avec celles d'un éventuel fichier _FILM_EDIT.json pour voir s'il y a des films supplémentaires.
+      // 2019-11-18 : On compare ces données avec celles d'un éventuel fichier _FILMS_EDIT.json pour voir s'il y a des films supplémentaires.
       // Si c'est le cas, un fichier _FILMS_ADD.json contenant les ajouts est écrit.
       try {
         let f_def = await helpers.readFileAsJson(
@@ -101,6 +102,7 @@ try {
         );
 
         let f_additions = _.differenceBy(f, f_def, "idFilm");
+        console.log(f_additions);
 
         if (f_additions.length > 0) {
           await helpers.writeFileInFolder(
@@ -111,10 +113,12 @@ try {
             "utf8"
           );
           console.log(
-            `${f_additions.length} films supplémentaires ont été trouvés. Un fichier d'ajouts a été écrit : ${cycleFullCode[0]}_FILMS_ADD ${cycleFullCode[1]}.json`
+            `AVERTISSEMENT : ${f_additions.length} films supplémentaires ont été trouvés. Un fichier d'ajouts a été écrit : ${cycleFullCode[0]}_FILMS_ADD ${cycleFullCode[1]}.json`
           );
         }
-      } catch (e) {}
+      } catch (e) {
+        // console.log(e);
+      }
     }
 
     // Confs (flag -a)

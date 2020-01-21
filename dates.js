@@ -23,7 +23,10 @@ try {
 }
 
 (async function() {
-  let progConfig = await helpers.fetchProgConfig(idProg, config.pathDataConfig);
+  let progConfig = await helpers.fetchProgConfig(
+    idProg,
+    config.access.pathDataConfig
+  );
   let progDirectoryName = helpers.getFullCode.prog(progConfig).join(" "); // Nom du répertoire du programme
 
   let cycles = _(progConfig)
@@ -48,6 +51,7 @@ try {
         let dates = _(seances)
           .orderBy(d => d.dateHeure)
           .thru(d => [
+            c,
             cycleFullCode[1],
             _.first(d).dateHeure,
             _.last(d).dateHeure
@@ -62,13 +66,13 @@ try {
 
   dates = await Promise.all(dates);
   dates = _(dates)
-    .filter(d => !!d[1]) // Elimine les cycles sans données
-    .sortBy(d => d[1])
+    .filter(d => !!d[2]) // Elimine les cycles sans données
+    .sortBy(d => d[2])
     .value();
 
   console.log(
     _.template(
-      "<% _.forEach(dates, d => { %>- <%= d[0] %> : <%= moment(d[1]).format('ddd D MMM') %> - <%= moment(d[2]).format('ddd D MMM') %>\n<% }) %>"
+      "<% _.forEach(dates, d => { %>- <%= d[0] %> - <%= d[1] %> : <%= moment(d[2]).format('ddd D MMM') %> - <%= moment(d[3]).format('ddd D MMM') %>\n<% }) %>"
     )({
       dates: dates,
       moment: moment

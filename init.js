@@ -21,9 +21,8 @@ try {
   let args = helpers.extractArgsValue(process.argv.slice(2).join(" "));
   var idProg = helpers.toNumOrNull(args.p[0]);
 } catch (e) {
-  console.error(
-    "Erreur d'arguments. Un argument est requis : -p <id programme>."
-  );
+  console.error("ERREUR : Un argument est requis : -p <id programme>.");
+  process.exit(1);
 }
 
 (async () => {
@@ -38,23 +37,22 @@ try {
     // 2019-11-26 : `forEach` se justifiait par le fait que `basePaths` avait plusieurs propriétés, pointant vers des emplacements à créer.
     // Je ne change pas le code, mais `basePaths` n'a plus que la propriété `remote`.
     fp.forEach(async p => {
-      try {
-        await helpers.mkdirDeep(p, progFullCode);
-        console.log(
-          `OK : Le répertoire "${progFullCode}" a été créé dans ${p}.`
-        );
-      } catch (e) {
-        if (e.errno === -4075) {
-          console.log(
-            `Erreur : Le répertoire "${progFullCode}" existe déjà dans ${p}`
-          );
-        } else {
-          console.log(e);
-        }
-      }
+      await helpers.mkdirDeep(p, progFullCode);
+      // try {
+      //   await helpers.mkdirDeep(p, progFullCode);
+      //   console.log(`Le répertoire "${progFullCode}" a été créé dans ${p}.`);
+      // } catch (e) {
+      //   if (e.errno === -4075) {
+      //     console.log(
+      //       `ERREUR : Le répertoire "${progFullCode}" existe déjà dans ${p}`
+      //     );
+      //   } else {
+      //     console.log(e);
+      //   }
+      // }
     })(basePaths);
   } catch (e) {
-    console.log("Erreur : l'initialisation a échoué.");
-    console.log(e);
+    console.log("ERREUR : L'initialisation a échoué.");
+    process.exit(1);
   }
 })();
