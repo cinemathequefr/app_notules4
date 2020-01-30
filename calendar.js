@@ -43,14 +43,15 @@ try {
   o = await queue.addAll(
     _(o).map(d => {
       return async () =>
-        new Promise((resolve, reject) => {
+        new Promise(async (resolve, reject) => {
           let res;
           try {
-            res = helpers.readFileAsJson(
+            res = await helpers.readFileAsJson(
               `${basePath}/${progDirectoryName}`,
               `${d[0]} ${d[1]}/generated`,
               `${d[0]}_MERGE_DEF ${d[1]}.json`
             );
+
             resolve(res);
           } catch (e) {
             reject(e);
@@ -60,8 +61,57 @@ try {
   );
 
   o = _(o)
-    .map(d => d.data)
+    .map(d =>
+      _(d.data)
+        .map(e =>
+          _(e.items)
+            .map(f =>
+              _.pick(f, [
+                "idSeance",
+                "ordre",
+                "dateHeure",
+                "idSalle",
+                "idFilm",
+                "titre",
+                "art",
+                "realisateurs",
+                "annee"
+              ])
+            )
+            .groupBy("idSeance")
+            .map((v, k) => {
+              return {
+                idSeance: k,
+                dateHeure: v[0].dateHeure,
+                idSalle: v[0].idSalle,
+                items: _(v)
+                  .map(w =>
+                    _.pick(w, [
+                      "idFilm",
+                      "titre",
+                      "art",
+                      "realisateurs",
+                      "annee"
+                    ])
+                  )
+                  .value()
+              };
+            })
+            .value()
+        )
+        .flatten()
+        .value()
+    )
+    .flatten()
+    .sortBy(v => v.dateHeure)
     .value();
 
-  console.log(JSON.stringify(o, null, 2));
+  // console.log(JSON.stringify(o, null, 2));
+  await helpers.writeFileInFolder(
+    `${basePath}/${progDirectoryName}`,
+    "",
+    `${progDirectoryName}_CALENDAR.json`,
+    JSON.stringify(o, null, 2),
+    "utf8"
+  );
 })();
