@@ -52,6 +52,10 @@ try {
               `${d[0]}_MERGE_DEF ${d[1]}.json`
             );
 
+            res = _(res)
+              .assign({ cycle: d[1] })
+              .value();
+
             resolve(res);
           } catch (e) {
             reject(e);
@@ -82,6 +86,7 @@ try {
             .map((v, k) => {
               return {
                 idSeance: k,
+                cycle: d.cycle,
                 dateHeure: v[0].dateHeure,
                 idSalle: v[0].idSalle,
                 items: _(v)
