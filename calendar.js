@@ -75,6 +75,8 @@ try {
                 "ordre",
                 "dateHeure",
                 "idSalle",
+                "titreEvenement",
+                "mention",
                 "idFilm",
                 "titre",
                 "art",
@@ -89,6 +91,8 @@ try {
                 cycle: d.cycle,
                 dateHeure: v[0].dateHeure,
                 idSalle: v[0].idSalle,
+                titreEvenement: v[0].titreEvenement,
+                mention: v[0].mention,
                 items: _(v)
                   .map(w =>
                     _.pick(w, [
