@@ -7,7 +7,7 @@ const _ = require("lodash");
 const database = require("./lib/database");
 const config = {
   main: require("./config/main.js"),
-  access: require("./config/access.js")
+  access: require("./config/access.js"),
 };
 const seances = require("./lib/query/seances.js");
 const films = require("./lib/query/films.js");
@@ -23,13 +23,12 @@ const { promisify } = require("util"); // https://stackoverflow.com/questions/40
 // Décode les arguments passés de la forme : -p 55 -c 400 -f
 try {
   let args = helpers.extractArgsValue(process.argv.slice(2).join(" "));
-
   var idProg = helpers.toNumOrNull(args.p[0]);
   var idCycle = helpers.toNumOrNull(args.c[0]);
   var doFilms = !_.isUndefined(args.f);
   var doSeances = !_.isUndefined(args.s);
   var doConfs = !_.isUndefined(args.a); // Flag `a` comme "action culturelle"
-  var doTexts = !_.isUndefined(args.t); // Flag `a` comme "action culturelle"
+  var doTexts = !_.isUndefined(args.t);
 } catch (e) {
   console.error(
     "ERREUR : Les arguments attendus sont de la forme : -p <id programme> -c <id cycle>."
@@ -39,7 +38,7 @@ try {
 
 // TODO: vérification de l'existence du répertoire du programme (sinon erreur et suggérer d'exécuter le script init)
 
-(async function() {
+(async function () {
   let progConfig = await helpers.fetchProgConfig(
     idProg,
     config.access.pathDataConfig
@@ -60,7 +59,7 @@ try {
         helpers.getIdCats(cycleConfig),
         (e1, e2) => e1.idCategorie === e2
       )
-      .map(e => `- ${_.values(e).join(" : ")}`)
+      .map((e) => `- ${_.values(e).join(" : ")}`)
       .value()
       .join("\n");
 
@@ -142,11 +141,7 @@ try {
       console.log(
         `Textes : ${
           _(t)
-            .map(d =>
-              _(d)
-                .map()
-                .value()
-            )
+            .map((d) => _(d).map().value())
             .flattenDeep()
             .value().length
         } items.`
