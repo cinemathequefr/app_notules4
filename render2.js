@@ -85,9 +85,112 @@ try {
   }
 
   seances = seancesAddCycleInfo(cycleConfig, seances);
+  seances = seancesAddFilmsConfs(seances, films, confs);
+  seances = seancesAddRelated(seances);
+  let merge = seances;
 
-  console.log(seances);
+  await helpers.writeFileInFolder(
+    `${basePath}/${progDirectoryName}`,
+    `${cycleFullCode[0]} ${cycleFullCode[1]}/generated_test`,
+    `${cycleFullCode[0]}_MERGE2${isDef ? "_DEF" : ""} ${cycleFullCode[1]}.json`,
+    JSON.stringify(merge, null, 2),
+    "utf8"
+  );
+  if (isDef) {
+    let success = await helpers.deleteFile(
+      `${basePath}/${progDirectoryName}`,
+      `${cycleFullCode[0]} ${cycleFullCode[1]}/generated_test`,
+      `${cycleFullCode[0]}_MERGE2 ${cycleFullCode[1]}.json`
+    );
+    if (success) {
+      console.log(
+        `Fichier inutile supprimé : ${cycleFullCode[0]}_MERGE2 ${cycleFullCode[1]}.json`
+      );
+    }
+  }
 })();
+
+/**
+ * seancesAddRelated
+ * Complète les données séances ayant une séance associée avec une propriété `mentionAssoc` donnant des indications sur la séance "jumelle".
+ * Dans le cas de { typeAssoc: 117 } (consécutives), il s'agit de deux séances véritablement distinctes.
+ * Dans le cas de { typeAssoc: 118 } (regroupées), il s'agit de 2 "segments" d'une même séance.
+ * @param {Array} seances Tableau de données séances (d'un cycle)
+ * @return {Array} Table de données séances complété
+ */
+function seancesAddRelated(seances) {
+  return _(seances)
+    .map((d) => {
+      let typeAssoc = d.typeAssoc;
+      if (typeAssoc === 118 || typeAssoc === 117) {
+        let j = _(seances).find(
+          (e) =>
+            e.typeAssoc === typeAssoc &&
+            e.idSeance === (typeAssoc === 117 ? d.idSeanceAssoc : d.idSeance) &&
+            e.typeEvenement === (d.typeEvenement === 13 ? 14 : 13)
+        );
+        if (!j) return d;
+        let mentionAssoc = null;
+        if (typeAssoc === 118 && j.typeEvenement === 13)
+          mentionAssoc = { mentionAssoc: `Séance regroupée. Voir aussi film.` };
+        if (typeAssoc === 118 && j.typeEvenement === 14)
+          mentionAssoc = {
+            mentionAssoc: `Séance regroupée. Voir aussi conférence.`,
+          };
+        if (typeAssoc === 117 && j.typeEvenement === 13)
+          mentionAssoc = {
+            mentionAssoc: `Séance consécutive. Voir aussi film.`,
+          };
+        if (typeAssoc === 117 && j.typeEvenement === 14)
+          mentionAssoc = {
+            mentionAssoc: `Séance consécutive. Voir aussi conférence.`,
+          };
+
+        return _(d).assign(mentionAssoc).value();
+      } else return d;
+    })
+    .value();
+}
+
+/**
+ * seancesAddFilmsConfs
+ * A partir des données séances, films et conférence, renvoie des données fusionnées (avec le détail des films/conférences)
+ * suivant l'énumération des séances.
+ * @param {Array} seances
+ * @param {Array} films
+ * @param {Array} confs
+ * @return {Array} Données fusionnées
+ */
+function seancesAddFilmsConfs(seances, films, confs) {
+  return _(seances)
+    .map((s) => {
+      if (s.typeEvenement === 13) {
+        return _(s)
+          .assign({
+            items: _(s.items)
+              .map((s1) =>
+                _(s1)
+                  .assign(_(films).find((f) => f.idFilm === s1.idFilm))
+                  .value()
+              )
+              .value(),
+          })
+          .value();
+      }
+      if (s.typeEvenement === 14) {
+        return _(s)
+          .assign({
+            items: [
+              _(s.items[0])
+                .assign(_(confs).find((c) => c.idEvenement === s.idEvenement))
+                .value(),
+            ],
+          })
+          .value();
+      }
+    })
+    .value();
+}
 
 /**
  * seancesAddCycleInfo
