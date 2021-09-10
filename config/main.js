@@ -5,34 +5,35 @@ module.exports = {
     bulletListMarker: "-",
     codeBlockStyle: "indented",
     emDelimiter: "_",
-    strongDelimiter: "**"
+    strongDelimiter: "**",
   },
   prettier: {
-    parser: "markdown"
+    parser: "markdown",
   },
   dict: {
     salles: {
       "1": ["HL", "Henri Langlois"],
       "2": ["GF", "Georges Franju"],
       "3": ["JE", "Jean Epstein"],
-      "4": ["HO", "Hors les murs"]
+      "4": ["HO", "Hors les murs"],
+      "5": ["LE", "Lotte Eisner"],
     },
     version: {
       "20": "VF",
       "21": "VO",
       "22": "VA",
-      "160": "Autres"
+      "160": "Autres",
     },
     sousTitres: {
       "23": "STF",
       "24": "STA",
-      "163": "Autres"
+      "163": "Autres",
     },
     intertitres: {
       "25": "INT. FR.",
       "26": "INT. ANG.",
       "164": "INT. ALL.",
-      "165": "Autres"
+      "165": "Autres",
     },
     format: {
       "27": "35 mm",
@@ -42,19 +43,19 @@ module.exports = {
       "166": "Numérique",
       "224": "Super 8",
       "225": "8 mm",
-      "237": "DCP"
+      "237": "DCP",
     },
     mentionSeance: {
       "102": "Séance suivie d'une discussion avec ",
       "103": "Accompagnement musical par ",
-      "247": "Séance présentée par "
+      "247": "Séance présentée par ",
     },
     typeSeance: {
       "43": "Avant-première",
       "44": "Ouverture de la rétrospective",
       "45": "Projection avec sous-titrage pour sourds et malentendants",
-      "159": "Projection spéciale"
-    }
+      "159": "Projection spéciale",
+    },
   },
   momentLocale: {
     fr: {
@@ -70,7 +71,7 @@ module.exports = {
         "septembre",
         "octobre",
         "novembre",
-        "décembre"
+        "décembre",
       ],
       monthsShort: [
         "jan",
@@ -84,7 +85,7 @@ module.exports = {
         "sep",
         "oct",
         "nov",
-        "déc"
+        "déc",
       ],
       weekdays: [
         "Dimanche",
@@ -93,10 +94,10 @@ module.exports = {
         "Mercredi ",
         "Jeudi ",
         "Vendredi ",
-        "Samedi "
+        "Samedi ",
       ],
-      weekdaysShort: ["Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"]
-    }
+      weekdaysShort: ["Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"],
+    },
   },
   countries: [
     ["AFG", "Afghanistan"],
@@ -260,6 +261,6 @@ module.exports = {
     ["YUG", "Yougoslavie"],
     ["ZAF", "Afrique du Sud"],
     ["ZAR", "Zaïre"],
-    ["ZWE", "Zimbabwe"]
-  ]
+    ["ZWE", "Zimbabwe"],
+  ],
 };

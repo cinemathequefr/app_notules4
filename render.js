@@ -4,7 +4,7 @@ const { promisify } = require("util");
 const helpers = require("./lib/helpers.js");
 // const format = require("./lib/format.js");
 const config = {
-  access: require("./config/access.js")
+  access: require("./config/access.js"),
 };
 const doMerge = require("./lib/transforms/merge.js");
 // const cleanTitreEvenement = require("./lib/transforms/clean_titre_evenement.js");
@@ -24,7 +24,7 @@ try {
   );
 }
 
-(async function() {
+(async function () {
   let progConfig = await helpers.fetchProgConfig(
     idProg,
     config.access.pathDataConfig
@@ -143,7 +143,7 @@ try {
   // _RENDER : Transformation de _MERGE en prenant en compte les regroupements et tri dans les sous-cycles
   render = {
     header: cycleConfig,
-    data: doRender(merge.data)
+    data: doRender(merge.data),
   };
   await helpers.writeFileInFolder(
     `${basePath}/${progDirectoryName}`,
@@ -167,6 +167,7 @@ try {
 
   // Conversion de _RENDER au format Markdown
   markdown = doMarkdown(render);
+
   await helpers.writeFileInFolder(
     `${basePath}/${progDirectoryName}`,
     `${cycleFullCode[0]} ${cycleFullCode[1]}`,
