@@ -9,11 +9,11 @@ const _ = require("lodash");
 // const { promisify } = require("util");
 const helpers = require("./lib/helpers.js");
 const config = {
-  access: require("./config/access.js")
+  access: require("./config/access.js"),
 };
 const PQueue = require("p-queue"); // https://github.com/sindresorhus/p-queue
 const queue = new PQueue({
-  concurrency: 1
+  concurrency: 1,
 });
 
 const basePath = config.access.pathData.remote;
@@ -27,7 +27,7 @@ try {
   );
 }
 
-(async function() {
+(async function () {
   let progConfig = await helpers.fetchProgConfig(
     idProg,
     config.access.pathDataConfig
@@ -37,11 +37,11 @@ try {
   let progDirectoryName = helpers.getFullCode.prog(progConfig).join(" "); // Nom du répertoire du programme
 
   let o = _(progConfig.cycles)
-    .map(d => helpers.getFullCode.cycle(progConfig, d.idCycleProg))
+    .map((d) => helpers.getFullCode.cycle(progConfig, d.idCycleProg))
     .value();
 
   o = await queue.addAll(
-    _(o).map(d => {
+    _(o).map((d) => {
       return async () =>
         new Promise(async (resolve, reject) => {
           let res;
@@ -52,9 +52,7 @@ try {
               `${d[0]}_MERGE_DEF ${d[1]}.json`
             );
 
-            res = _(res)
-              .assign({ cycle: d[1] })
-              .value();
+            res = _(res).assign({ cycle: d[1] }).value();
 
             resolve(res);
           } catch (e) {
@@ -65,55 +63,115 @@ try {
   );
 
   o = _(o)
-    .map(d =>
+    .map((d) =>
       _(d.data)
-        .map(e =>
-          _(e.items)
-            .map(f =>
-              _.pick(f, [
-                "idSeance",
-                "ordre",
-                "dateHeure",
-                "idSalle",
-                "titreEvenement",
-                "mention",
-                "idFilm",
-                "titre",
-                "art",
-                "realisateurs",
-                "annee"
-              ])
-            )
+        .map((e) => {
+          let titreSousCycle = e.titreSousCycle;
+          console.log(titreSousCycle);
+          return _(e.items)
+            .map((f) => {
+              return _({})
+                .assign(
+                  _.pick(f, [
+                    "idSeance",
+                    "ordre",
+                    "dateHeure",
+                    "idSalle",
+                    "titreEvenement",
+                    "mention",
+                    "idFilm",
+                    "titre",
+                    "art",
+                    "realisateurs",
+                    "annee",
+                  ]),
+                  { titreSousCycle }
+                )
+                .value();
+            })
             .groupBy("idSeance")
             .map((v, k) => {
               return {
                 idSeance: k,
                 cycle: d.cycle,
+                titreSousCycle: v[0].titreSousCycle,
                 dateHeure: v[0].dateHeure,
                 idSalle: v[0].idSalle,
                 titreEvenement: v[0].titreEvenement,
                 mention: v[0].mention,
                 items: _(v)
-                  .map(w =>
+                  .map((w) =>
                     _.pick(w, [
                       "idFilm",
                       "titre",
                       "art",
                       "realisateurs",
-                      "annee"
+                      "annee",
                     ])
                   )
-                  .value()
+                  .value(),
               };
             })
-            .value()
-        )
+            .value();
+        })
         .flatten()
         .value()
     )
     .flatten()
-    .sortBy(v => v.dateHeure)
+    .sortBy((v) => v.dateHeure)
     .value();
+
+  // o = _(o)
+  //   .map(
+  //     (d) =>
+  //       _(d.data)
+  //         .map((e) =>
+  //           _(e.items)
+  //             .map((f) =>
+  //               _.pick(f, [
+  //                 "idSeance",
+  //                 "ordre",
+  //                 "dateHeure",
+  //                 "idSalle",
+  //                 "titreEvenement",
+  //                 "mention",
+  //                 "idFilm",
+  //                 "titre",
+  //                 "art",
+  //                 "realisateurs",
+  //                 "annee",
+  //               ])
+  //             )
+  //             .groupBy("idSeance")
+  //             .map((v, k) => {
+  //               return {
+  //                 idSeance: k,
+  //                 cycle: d.cycle,
+  //                 dateHeure: v[0].dateHeure,
+  //                 idSalle: v[0].idSalle,
+  //                 titreEvenement: v[0].titreEvenement,
+  //                 mention: v[0].mention,
+  //                 items: _(v)
+  //                   .map((w) =>
+  //                     _.pick(w, [
+  //                       "idFilm",
+  //                       "titre",
+  //                       "art",
+  //                       "realisateurs",
+  //                       "annee",
+  //                     ])
+  //                   )
+  //                   .value(),
+  //               };
+  //             })
+  //             .value()
+  //         )
+  //         .flatten()
+  //         .value()
+  //   )
+  //   .flatten()
+  //   .sortBy((v) => v.dateHeure)
+  //   .value();
 
   // console.log(JSON.stringify(o, null, 2));
   await helpers.writeFileInFolder(
