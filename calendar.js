@@ -16,6 +16,8 @@ const queue = new PQueue({
   concurrency: 1,
 });
 
+const doCalendar = require("./lib/transforms/calendar.js");
+
 const basePath = config.access.pathData.remote;
 
 try {
@@ -56,7 +58,8 @@ try {
 
             resolve(res);
           } catch (e) {
-            reject(e);
+            resolve({ data: [] });
+            // reject(e);
           }
         });
     })
@@ -67,7 +70,6 @@ try {
       _(d.data)
         .map((e) => {
           let titreSousCycle = e.titreSousCycle;
-          console.log(titreSousCycle);
           return _(e.items)
             .map((f) => {
               return _({})
@@ -84,6 +86,8 @@ try {
                     "art",
                     "realisateurs",
                     "annee",
+                    "duree",
+                    "version",
                   ]),
                   { titreSousCycle }
                 )
@@ -107,6 +111,9 @@ try {
                       "art",
                       "realisateurs",
                       "annee",
+                      "duree",
+                      "version",
+                      "mention",
                     ])
                   )
                   .value(),
@@ -121,64 +128,41 @@ try {
     .sortBy((v) => v.dateHeure)
     .value();
 
-  // o = _(o)
-  //   .map(
-  //     (d) =>
-  //       _(d.data)
-  //         .map((e) =>
-  //           _(e.items)
-  //             .map((f) =>
-  //               _.pick(f, [
-  //                 "idSeance",
-  //                 "ordre",
-  //                 "dateHeure",
-  //                 "idSalle",
-  //                 "titreEvenement",
-  //                 "mention",
-  //                 "idFilm",
-  //                 "titre",
-  //                 "art",
-  //                 "realisateurs",
-  //                 "annee",
-  //               ])
-  //             )
-  //             .groupBy("idSeance")
-  //             .map((v, k) => {
-  //               return {
-  //                 idSeance: k,
-  //                 cycle: d.cycle,
-  //                 dateHeure: v[0].dateHeure,
-  //                 idSalle: v[0].idSalle,
-  //                 titreEvenement: v[0].titreEvenement,
-  //                 mention: v[0].mention,
-  //                 items: _(v)
-  //                   .map((w) =>
-  //                     _.pick(w, [
-  //                       "idFilm",
-  //                       "titre",
-  //                       "art",
-  //                       "realisateurs",
-  //                       "annee",
-  //                     ])
-  //                   )
-  //                   .value(),
-  //               };
-  //             })
-  //             .value()
-  //         )
-  //         .flatten()
-  //         .value()
-  //   )
-  //   .flatten()
-  //   .sortBy((v) => v.dateHeure)
-  //   .value();
+  const rendered = _(o)
+    .groupBy((d) => d.dateHeure.substring(0, 10))
+    .mapValues((day) =>
+      _(day)
+        .map((seance) => {
+          return {
+            salle: seance.idSalle[0],
+            heure: seance.dateHeure.substring(11, 16),
+            cycle: seance.cycle,
+            titreSousCycle: seance.titreSousCycle,
+            mention: seance.mention,
+            items: _(seance.items)
+              .map((d) => {
+                return {
+                  titre: d.titre,
+                  art: d.art,
+                  realisateurs: d.realisateurs,
+                  duree: d.duree,
+                  version: d.version,
+                };
+              })
+              .value(),
+          };
+        })
+        .value()
+    )
+    .value();
 
-  // console.log(JSON.stringify(o, null, 2));
-  await helpers.writeFileInFolder(
-    `${basePath}/${progDirectoryName}`,
-    "",
-    `${progDirectoryName}_CALENDAR.json`,
-    JSON.stringify(o, null, 2),
-    "utf8"
-  );
+  console.log(doCalendar(rendered));
+
+  // await helpers.writeFileInFolder(
+  //   `${basePath}/${progDirectoryName}`,
+  //   "",
+  //   `${progDirectoryName}_CALENDAR.json`,
+  //   JSON.stringify(o, null, 2),
+  //   "utf8"
+  // );
 })();

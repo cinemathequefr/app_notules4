@@ -97,6 +97,7 @@ module.exports = {
         "Samedi ",
       ],
       weekdaysShort: ["Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"],
+      weekdaysMin: ["Di", "Lu", "Ma", "Me", "Je", "Ve", "Sa"],
     },
   },
   countries: [
