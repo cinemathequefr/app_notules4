@@ -17,7 +17,6 @@ const queue = new PQueue({
 });
 
 const doCalendar = require("./lib/transforms/calendar.js");
-
 const basePath = config.access.pathData.remote;
 
 try {
@@ -35,17 +34,18 @@ try {
     config.access.pathDataConfig
   );
 
-  // let cycleConfig = helpers.cycleConfig(progConfig, idCycle);
   let progDirectoryName = helpers.getFullCode.prog(progConfig).join(" "); // Nom du répertoire du programme
 
+  // On extrait un tableau contenant pour chaque cycle, le code de son répertoire et son nom ([["PROG99_CYCL460","Hugo Santiago"],...]).
   let o = _(progConfig.cycles)
     .map((d) => helpers.getFullCode.cycle(progConfig, d.idCycleProg))
     .value();
 
+  // On crée un tableau avec les données MERGE_DEF des cycles du programme ([{data, info}]), en ajoutant à chacun la propriété `cycle` (titre du cycle).
   o = await queue.addAll(
     _(o).map((d) => {
       return async () =>
-        new Promise(async (resolve, reject) => {
+        new Promise(async (resolve) => {
           let res;
           try {
             res = await helpers.readFileAsJson(
@@ -53,13 +53,10 @@ try {
               `${d[0]} ${d[1]}/generated`,
               `${d[0]}_MERGE_DEF ${d[1]}.json`
             );
-
             res = _(res).assign({ cycle: d[1] }).value();
-
             resolve(res);
           } catch (e) {
             resolve({ data: [] });
-            // reject(e);
           }
         });
     })
@@ -79,6 +76,7 @@ try {
                     "ordre",
                     "dateHeure",
                     "idSalle",
+                    "typeEvenement",
                     "titreEvenement",
                     "mention",
                     "idFilm",
@@ -102,11 +100,13 @@ try {
                 dateHeure: v[0].dateHeure,
                 idSalle: v[0].idSalle,
                 titreEvenement: v[0].titreEvenement,
+                typeEvenement: v[0].typeEvenement,
                 mention: v[0].mention,
                 items: _(v)
                   .map((w) =>
                     _.pick(w, [
                       "idFilm",
+                      "ordre",
                       "titre",
                       "art",
                       "realisateurs",
@@ -125,9 +125,70 @@ try {
         .value()
     )
     .flatten()
-    .sortBy((v) => v.dateHeure)
     .value();
 
+  console.log(JSON.stringify(o, null, 2));
+
+  // Supprime la durée des événements d'action culturelle
+  // NOTE : on simplifie en tenant compte du fait qu'il ne peut y en avoir qu'un seul.
+  o = _(o)
+    .map((d) =>
+      d.typeEvenement === 14
+        ? _({})
+            .assign(d, { items: _(d.items[0]).omit("duree").value() })
+            .value()
+        : d
+    )
+    .value();
+
+  // Réunit les séances film + conférence en une seule séance.
+  // Réunit les séances identiques associées à plusieurs sous-cycles
+  // Pour toutes les séances, la propriété `cycle` de vient un tableau de tableaux : [[titreCycle1, titreSousCycle1], [titreCycle2, titreSousCycle2], ...].
+  // Trie les séances.
+  o = _(o)
+    .groupBy((d) => d.idSeance)
+    .map((d) =>
+      _({})
+        .assign(d[0], {
+          idSeance: Number(d[0].idSeance),
+          cycle: _(d)
+            .map((d) => [d.cycle, d.titreSousCycle])
+            .value(),
+          items: _(d)
+            .map((e) => e.items)
+            .flatten()
+            .uniqBy((e) => e.ordre)
+            .orderBy((e) => e.ordre)
+            .value(),
+        })
+        .omit("titreSousCycle")
+        .value()
+    )
+    .sortBy((v) => [v.dateHeure, v.idSalle[0]])
+    .value();
+
+  // Filtrage des titres de cycles (à ajuster selon les besoins)
+  o = _(o)
+    .map((d) =>
+      _({})
+        .assign(d, {
+          cycle: _(d.cycle)
+            .map((e) => {
+              if (e[0] === "Séances Jeune public")
+                return ["Séance Jeune public", ""];
+              if (e[0] === "Séances spéciales") return ["Séance spéciale", ""];
+              if (e[0] === "Cinéma bis" || e[0] === "Aujourd'hui le cinéma")
+                return e;
+              return null; // Autre cas : on met cycle à null pour le retirer à l'étape suivante
+            })
+            .filter((e) => e !== null)
+            .value(),
+        })
+        .value()
+    )
+    .value();
+
+  // Formatage calendrier : regroupement par date.
   const rendered = _(o)
     .groupBy((d) => d.dateHeure.substring(0, 10))
     .mapValues((day) =>
@@ -156,13 +217,11 @@ try {
     )
     .value();
 
-  console.log(doCalendar(rendered));
-
-  // await helpers.writeFileInFolder(
-  //   `${basePath}/${progDirectoryName}`,
-  //   "",
-  //   `${progDirectoryName}_CALENDAR.json`,
-  //   JSON.stringify(o, null, 2),
-  //   "utf8"
-  // );
+  await helpers.writeFileInFolder(
+    `${basePath}/${progDirectoryName}`,
+    "",
+    `${progDirectoryName}_CALENDAR.txt`,
+    doCalendar(rendered),
+    "latin1"
+  );
 })();
