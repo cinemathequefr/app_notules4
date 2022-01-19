@@ -78,7 +78,6 @@ try {
                     "idSalle",
                     "typeEvenement",
                     "titreEvenement",
-                    "mention",
                     "idFilm",
                     "titre",
                     "art",
@@ -86,6 +85,7 @@ try {
                     "annee",
                     "duree",
                     "version",
+                    "mention",
                   ]),
                   { titreSousCycle }
                 )
@@ -127,7 +127,7 @@ try {
     .flatten()
     .value();
 
-  console.log(JSON.stringify(o, null, 2));
+  // console.log(JSON.stringify(o, null, 2));
 
   // Supprime la durée des événements d'action culturelle
   // NOTE : on simplifie en tenant compte du fait qu'il ne peut y en avoir qu'un seul.
@@ -174,6 +174,7 @@ try {
         .assign(d, {
           cycle: _(d.cycle)
             .map((e) => {
+              if (e[0] === "Ciné-club de Frédéric Bonnaud") return [e[0]];
               if (e[0] === "Séances Jeune public")
                 return ["Séance Jeune public", ""];
               if (e[0] === "Séances spéciales") return ["Séance spéciale", ""];
@@ -187,6 +188,8 @@ try {
         .value()
     )
     .value();
+
+  // console.log(JSON.stringify(o, null, 2));
 
   // Formatage calendrier : regroupement par date.
   const rendered = _(o)
@@ -221,7 +224,7 @@ try {
     `${basePath}/${progDirectoryName}`,
     "",
     `${progDirectoryName}_CALENDAR.txt`,
-    doCalendar(rendered),
+    doCalendar.taggedTextInDesign(rendered),
     "latin1"
   );
 })();
