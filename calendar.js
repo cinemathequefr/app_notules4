@@ -8,6 +8,7 @@
 const _ = require("lodash");
 // const { promisify } = require("util");
 const helpers = require("./lib/helpers.js");
+
 const config = {
   access: require("./config/access.js"),
 };
@@ -113,7 +114,6 @@ try {
                       "annee",
                       "duree",
                       "version",
-                      "mention",
                     ])
                   )
                   .value(),
@@ -189,7 +189,7 @@ try {
     )
     .value();
 
-  // console.log(JSON.stringify(o, null, 2));
+  console.log(JSON.stringify(o, null, 2));
 
   // Formatage calendrier : regroupement par date.
   const rendered = _(o)
