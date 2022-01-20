@@ -105,16 +105,21 @@ try {
                 mention: v[0].mention,
                 items: _(v)
                   .map((w) =>
-                    _.pick(w, [
-                      "idFilm",
-                      "ordre",
-                      "titre",
-                      "art",
-                      "realisateurs",
-                      "annee",
-                      "duree",
-                      "version",
-                    ])
+                    _({})
+                      .assign(
+                        _.pick(w, [
+                          "idFilm",
+                          "ordre",
+                          "titre",
+                          "art",
+                          "realisateurs",
+                          "annee",
+                          "duree",
+                          "version",
+                        ]),
+                        { isConf: v[0].typeEvenement === 14 }
+                      )
+                      .value()
                   )
                   .value(),
               };
@@ -189,7 +194,7 @@ try {
     )
     .value();
 
-  console.log(JSON.stringify(o, null, 2));
+  // console.log(JSON.stringify(o, null, 2));
 
   // Formatage calendrier : regroupement par date.
   const rendered = _(o)
@@ -211,6 +216,7 @@ try {
                   realisateurs: d.realisateurs,
                   duree: d.duree,
                   version: d.version,
+                  isConf: d.isConf,
                 };
               })
               .value(),
