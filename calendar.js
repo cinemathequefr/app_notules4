@@ -1,14 +1,10 @@
 /**
  * calendar
- * Génère le calendrier des séances du programme à partir des fichiers _MERGE.json de chaque cycle.
- * En cours.
+ * Génère le calendrier des séances du programme à partir des fichiers _MERGE_DEF.json de chaque cycle.
  */
-
-// const fs = require("fs");
 const _ = require("lodash");
-// const { promisify } = require("util");
+const database = require("./lib/database");
 const helpers = require("./lib/helpers.js");
-
 const config = {
   access: require("./config/access.js"),
 };
@@ -19,6 +15,7 @@ const queue = new PQueue({
 
 const doCalendar = require("./lib/transforms/calendar.js");
 const basePath = config.access.pathData.remote;
+const pages = require("./lib/query/pages.js");
 
 try {
   let args = helpers.extractArgsValue(process.argv.slice(2).join(" "));
@@ -35,7 +32,34 @@ try {
     config.access.pathDataConfig
   );
 
-  let progDirectoryName = helpers.getFullCode.prog(progConfig).join(" "); // Nom du répertoire du programme
+  const progDirectoryName = helpers.getFullCode.prog(progConfig).join(" "); // Nom du répertoire du programme
+
+  // Tableau des IDs des catégories du programme.
+  // (Utilisé pour faire une requête sur Cinédoc pour obtenir le foliotage.)
+  let catsInProg = _(progConfig)
+    .thru((d) => {
+      return _(d.cycles)
+        .map((e) =>
+          _(e.sousCycles)
+            .map((f) => f.cats)
+            .value()
+        )
+        .value();
+    })
+    .flattenDeep()
+    .uniq()
+    .sort()
+    .value();
+
+  try {
+    const db = await database.attach(config.access.db);
+    console.log("Connecté à la base de données.");
+    let p = await pages(db, catsInProg);
+    console.log(JSON.stringify(p, null, 2));
+  } catch (e) {
+    console.log(e);
+  }
+  process.exit(0);
 
   // On extrait un tableau contenant pour chaque cycle, le code de son répertoire et son nom ([["PROG99_CYCL460","Hugo Santiago"],...]).
   let o = _(progConfig.cycles)
