@@ -17,6 +17,8 @@ const doCalendar = require("./lib/transforms/calendar.js");
 const basePath = config.access.pathData.remote;
 const pages = require("./lib/query/pages.js");
 
+let evenementsPages;
+
 try {
   let args = helpers.extractArgsValue(process.argv.slice(2).join(" "));
   var idProg = helpers.toNumOrNull(args.p[0]);
@@ -54,12 +56,10 @@ try {
   try {
     const db = await database.attach(config.access.db);
     console.log("Connecté à la base de données.");
-    let p = await pages(db, catsInProg);
-    console.log(JSON.stringify(p, null, 2));
+    evenementsPages = await pages(db, catsInProg);
   } catch (e) {
     console.log(e);
   }
-  process.exit(0);
 
   // On extrait un tableau contenant pour chaque cycle, le code de son répertoire et son nom ([["PROG99_CYCL460","Hugo Santiago"],...]).
   let o = _(progConfig.cycles)
@@ -101,6 +101,7 @@ try {
                     "ordre",
                     "dateHeure",
                     "idSalle",
+                    "idEvenement",
                     "typeEvenement",
                     "titreEvenement",
                     "idFilm",
@@ -124,6 +125,15 @@ try {
                 titreSousCycle: v[0].titreSousCycle,
                 dateHeure: v[0].dateHeure,
                 idSalle: v[0].idSalle,
+                idEvenement: v[0].idEvenement,
+                page: _(evenementsPages)
+                  .thru((g) => {
+                    let h = _(g).find(
+                      (g) => g.idevenement === v[0].idEvenement
+                    );
+                    return h ? h.numeroPage : null;
+                  })
+                  .value(),
                 titreEvenement: v[0].titreEvenement,
                 typeEvenement: v[0].typeEvenement,
                 mention: v[0].mention,
@@ -232,6 +242,7 @@ try {
             cycle: seance.cycle,
             titreSousCycle: seance.titreSousCycle,
             mention: seance.mention,
+            page: seance.page,
             items: _(seance.items)
               .map((d) => {
                 return {
@@ -257,4 +268,6 @@ try {
     doCalendar.taggedTextInDesign(rendered),
     "latin1"
   );
+
+  process.exit(0);
 })();
