@@ -37,20 +37,21 @@ try {
 
   // Tableau des IDs des catégories du programme.
   // (Utilisé pour faire une requête sur Cinédoc pour obtenir le foliotage.)
-  let catsInProg = _(progConfig)
-    .thru((d) => {
-      return _(d.cycles)
-        .map((e) =>
-          _(e.sousCycles)
-            .map((f) => f.cats)
-            .value()
-        )
-        .value();
-    })
-    .flattenDeep()
-    .uniq()
-    .sort()
-    .value();
+  // TODO: déplacer dans le rendu du calendrier papier ?
+  // let catsInProg = _(progConfig)
+  //   .thru((d) => {
+  //     return _(d.cycles)
+  //       .map((e) =>
+  //         _(e.sousCycles)
+  //           .map((f) => f.cats)
+  //           .value()
+  //       )
+  //       .value();
+  //   })
+  //   .flattenDeep()
+  //   .uniq()
+  //   .sort()
+  //   .value();
 
   // TODO: déplacer dans le rendu du calendrier papier.
   // try {
@@ -102,6 +103,7 @@ try {
                     "dateHeure",
                     "idSalle",
                     "idEvenement",
+                    "titreEvenement",
                     "typeEvenement",
                     "typeConference",
                     "titreEvenement",
@@ -147,6 +149,7 @@ try {
                         _.pick(w, [
                           "idFilm",
                           "idEvenement",
+                          // "titreEvenement",
                           "typeConference",
                           "titre",
                           "art",
@@ -248,6 +251,7 @@ try {
             salle: seance.idSalle[0],
             cycle: seance.cycle,
             titreSousCycle: seance.titreSousCycle,
+            titreEvenement: seance.titreEvenement,
             mention: seance.mention,
             // page: seance.page,
             items: _(seance.items)
@@ -257,8 +261,7 @@ try {
                   idConf: d.isConf ? d.idEvenement : undefined,
                   titre: d.isConf
                     ? ((t) => {
-                        console.log(t);
-                        console.log(_(t).startsWith("Film + "));
+                        // Pour les titres d'items de type Action culturelle, retirer l'éventuel préfixe "Film + ".
                         if (_(t).startsWith("Film + ")) {
                           return _.upperFirst(t.substring(7));
                         } else {
