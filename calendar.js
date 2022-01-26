@@ -247,7 +247,8 @@ try {
         .map((seance) => {
           return {
             idSeance: seance.idSeance,
-            heure: seance.dateHeure.substring(11, 16),
+            dateHeure: seance.dateHeure, // On garde quand même ici `dateHeure`.
+            // heure: seance.dateHeure.substring(11, 16),
             salle: seance.idSalle[0],
             cycle: seance.cycle,
             titreSousCycle: seance.titreSousCycle,
@@ -287,7 +288,7 @@ try {
         .map((seance) =>
           _({})
             .assign(seance, {
-              hashManifestation: _(seance.items)
+              hashEvenement: _(seance.items)
                 .map((d) => (d.idFilm ? `f${d.idFilm}` : `c${d.idConf}`))
                 .value()
                 .join(""),
