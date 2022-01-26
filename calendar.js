@@ -53,6 +53,7 @@ try {
     .sort()
     .value();
 
+  // TODO: déplacer dans le rendu du calendrier papier.
   try {
     const db = await database.attach(config.access.db);
     console.log("Connecté à la base de données.");
@@ -166,10 +167,9 @@ try {
     .flatten()
     .value();
 
-  // console.log(JSON.stringify(o, null, 2));
-
   // Supprime la durée des événements d'action culturelle
   // NOTE : on simplifie en tenant compte du fait qu'il ne peut y en avoir qu'un seul.
+  // TODO: déplacer dans le rendu du calendrier papier.
   o = _(o)
     .map((d) =>
       d.typeEvenement === 14
@@ -182,7 +182,7 @@ try {
 
   // Réunit les séances film + conférence en une seule séance.
   // Réunit les séances identiques associées à plusieurs sous-cycles
-  // Pour toutes les séances, la propriété `cycle` de vient un tableau de tableaux : [[titreCycle1, titreSousCycle1], [titreCycle2, titreSousCycle2], ...].
+  // Pour toutes les séances, la propriété `cycle` devient un tableau de tableaux : [[titreCycle1, titreSousCycle1], [titreCycle2, titreSousCycle2], ...].
   // Trie les séances.
   o = _(o)
     .groupBy((d) => d.idSeance)
@@ -207,6 +207,7 @@ try {
     .value();
 
   // Filtrage des titres de cycles (à ajuster selon les besoins)
+  // TODO: déplacer dans le rendu du calendrier papier.
   o = _(o)
     .map((d) =>
       _({})
