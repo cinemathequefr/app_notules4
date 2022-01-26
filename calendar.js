@@ -175,19 +175,6 @@ try {
     .flatten()
     .value();
 
-  // Supprime la durée des événements d'action culturelle
-  // NOTE : on simplifie en tenant compte du fait qu'il ne peut y en avoir qu'un seul.
-  // TODO: déplacer dans le rendu du calendrier papier.
-  // o = _(o)
-  //   .map((d) =>
-  //     d.typeEvenement === 14
-  //       ? _({})
-  //           .assign(d, { items: _(d.items[0]).omit("duree").value() })
-  //           .value()
-  //       : d
-  //   )
-  //   .value();
-
   // Réunit les séances film + conférence en une seule séance.
   // Réunit les séances identiques associées à plusieurs sous-cycles
   // Pour toutes les séances, la propriété `cycle` devient un tableau de tableaux : [[titreCycle1, titreSousCycle1], [titreCycle2, titreSousCycle2], ...].
@@ -228,7 +215,7 @@ try {
   //             if (e[0] === "Séances spéciales") return ["Séance spéciale", ""];
   //             if (e[0] === "Cinéma bis" || e[0] === "Aujourd'hui le cinéma")
   //               return e;
-  //             return null; // Autre cas : on met cycle à null pour le retirer à l'étape suivante
+  //             return null; // Autres cass : on met cycle à null pour le retirer à l'étape suivante
   //           })
   //           .filter((e) => e !== null)
   //           .value(),
@@ -259,7 +246,11 @@ try {
               .map((d) => {
                 return {
                   idFilm: d.idFilm || undefined,
-                  idConf: d.isConf ? d.idEvenement : undefined,
+                  idConf:
+                    d.isConf && _.isUndefined(d.idFilm)
+                      ? d.idEvenement
+                      : undefined,
+                  // idConf: d.isConf ? d.idEvenement : undefined,
                   titre: d.isConf
                     ? ((t) => {
                         // Pour les titres d'items de type Action culturelle, retirer l'éventuel préfixe "Film + ".
@@ -299,14 +290,18 @@ try {
     )
     .value();
 
-  await helpers.writeFileInFolder(
-    `${basePath}/${progDirectoryName}`,
-    "",
-    `${progDirectoryName}_CALENDAR.json`,
-    JSON.stringify(rendered, null, 2),
-    // doCalendar.taggedTextInDesign(rendered),
-    "utf8"
-  );
+  // await helpers.writeFileInFolder(
+  //   `${basePath}/${progDirectoryName}`,
+  //   "",
+  //   `${progDirectoryName}_CALENDAR.json`,
+  //   JSON.stringify(rendered, null, 2),
+  //   "utf8"
+  // );
+
+  // console.log(JSON.stringify(rendered, null, 2));
+
+  //TEST
+  await doCalendar.taggedTextInDesign(rendered, idProg);
   // await helpers.writeFileInFolder(
   //   `${basePath}/${progDirectoryName}`,
   //   "",
