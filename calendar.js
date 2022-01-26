@@ -3,7 +3,7 @@
  * Génère le calendrier des séances du programme à partir des fichiers _MERGE_DEF.json de chaque cycle.
  */
 const _ = require("lodash");
-const database = require("./lib/database");
+// const database = require("./lib/database");
 const helpers = require("./lib/helpers.js");
 const config = {
   access: require("./config/access.js"),
@@ -15,9 +15,8 @@ const queue = new PQueue({
 
 const doCalendar = require("./lib/transforms/calendar.js");
 const basePath = config.access.pathData.remote;
-const pages = require("./lib/query/pages.js");
-
-let evenementsPages;
+// const pages = require("./lib/query/pages.js");
+// let evenementsPages;
 
 try {
   let args = helpers.extractArgsValue(process.argv.slice(2).join(" "));
@@ -54,13 +53,13 @@ try {
     .value();
 
   // TODO: déplacer dans le rendu du calendrier papier.
-  try {
-    const db = await database.attach(config.access.db);
-    console.log("Connecté à la base de données.");
-    evenementsPages = await pages(db, catsInProg);
-  } catch (e) {
-    console.log(e);
-  }
+  // try {
+  //   const db = await database.attach(config.access.db);
+  //   console.log("Connecté à la base de données.");
+  //   evenementsPages = await pages(db, catsInProg);
+  // } catch (e) {
+  //   console.log(e);
+  // }
 
   // On extrait un tableau contenant pour chaque cycle, le code de son répertoire et son nom ([["PROG99_CYCL460","Hugo Santiago"],...]).
   let o = _(progConfig.cycles)
@@ -104,6 +103,7 @@ try {
                     "idSalle",
                     "idEvenement",
                     "typeEvenement",
+                    "typeConference",
                     "titreEvenement",
                     "idFilm",
                     "titre",
@@ -112,6 +112,7 @@ try {
                     "annee",
                     "duree",
                     "version",
+                    "format",
                     "mention",
                   ]),
                   { titreSousCycle }
@@ -127,16 +128,17 @@ try {
                 dateHeure: v[0].dateHeure,
                 idSalle: v[0].idSalle,
                 idEvenement: v[0].idEvenement,
-                page: _(evenementsPages)
-                  .thru((g) => {
-                    let h = _(g).find(
-                      (g) => g.idevenement === v[0].idEvenement
-                    );
-                    return h ? h.numeroPage : null;
-                  })
-                  .value(),
+                // page: _(evenementsPages)
+                //   .thru((g) => {
+                //     let h = _(g).find(
+                //       (g) => g.idevenement === v[0].idEvenement
+                //     );
+                //     return h ? h.numeroPage : null;
+                //   })
+                //   .value(),
                 titreEvenement: v[0].titreEvenement,
                 typeEvenement: v[0].typeEvenement,
+                typeConference: v[0].typeConference,
                 mention: v[0].mention,
                 items: _(v)
                   .map((w) =>
@@ -144,13 +146,16 @@ try {
                       .assign(
                         _.pick(w, [
                           "idFilm",
-                          "ordre",
+                          "idEvenement",
+                          "typeConference",
                           "titre",
                           "art",
                           "realisateurs",
                           "annee",
                           "duree",
                           "version",
+                          "format",
+                          "ordre",
                         ]),
                         { isConf: v[0].typeEvenement === 14 }
                       )
@@ -170,15 +175,15 @@ try {
   // Supprime la durée des événements d'action culturelle
   // NOTE : on simplifie en tenant compte du fait qu'il ne peut y en avoir qu'un seul.
   // TODO: déplacer dans le rendu du calendrier papier.
-  o = _(o)
-    .map((d) =>
-      d.typeEvenement === 14
-        ? _({})
-            .assign(d, { items: _(d.items[0]).omit("duree").value() })
-            .value()
-        : d
-    )
-    .value();
+  // o = _(o)
+  //   .map((d) =>
+  //     d.typeEvenement === 14
+  //       ? _({})
+  //           .assign(d, { items: _(d.items[0]).omit("duree").value() })
+  //           .value()
+  //       : d
+  //   )
+  //   .value();
 
   // Réunit les séances film + conférence en une seule séance.
   // Réunit les séances identiques associées à plusieurs sous-cycles
@@ -208,26 +213,26 @@ try {
 
   // Filtrage des titres de cycles (à ajuster selon les besoins)
   // TODO: déplacer dans le rendu du calendrier papier.
-  o = _(o)
-    .map((d) =>
-      _({})
-        .assign(d, {
-          cycle: _(d.cycle)
-            .map((e) => {
-              if (e[0] === "Ciné-club de Frédéric Bonnaud") return [e[0]];
-              if (e[0] === "Séances Jeune public")
-                return ["Séance Jeune public", ""];
-              if (e[0] === "Séances spéciales") return ["Séance spéciale", ""];
-              if (e[0] === "Cinéma bis" || e[0] === "Aujourd'hui le cinéma")
-                return e;
-              return null; // Autre cas : on met cycle à null pour le retirer à l'étape suivante
-            })
-            .filter((e) => e !== null)
-            .value(),
-        })
-        .value()
-    )
-    .value();
+  // o = _(o)
+  //   .map((d) =>
+  //     _({})
+  //       .assign(d, {
+  //         cycle: _(d.cycle)
+  //           .map((e) => {
+  //             if (e[0] === "Ciné-club de Frédéric Bonnaud") return [e[0]];
+  //             if (e[0] === "Séances Jeune public")
+  //               return ["Séance Jeune public", ""];
+  //             if (e[0] === "Séances spéciales") return ["Séance spéciale", ""];
+  //             if (e[0] === "Cinéma bis" || e[0] === "Aujourd'hui le cinéma")
+  //               return e;
+  //             return null; // Autre cas : on met cycle à null pour le retirer à l'étape suivante
+  //           })
+  //           .filter((e) => e !== null)
+  //           .value(),
+  //       })
+  //       .value()
+  //   )
+  //   .value();
 
   // console.log(JSON.stringify(o, null, 2));
 
@@ -238,26 +243,54 @@ try {
       _(day)
         .map((seance) => {
           return {
-            salle: seance.idSalle[0],
+            idSeance: seance.idSeance,
             heure: seance.dateHeure.substring(11, 16),
+            salle: seance.idSalle[0],
             cycle: seance.cycle,
             titreSousCycle: seance.titreSousCycle,
             mention: seance.mention,
-            page: seance.page,
+            // page: seance.page,
             items: _(seance.items)
               .map((d) => {
                 return {
-                  titre: d.titre,
-                  art: d.art,
+                  idFilm: d.idFilm || undefined,
+                  idConf: d.isConf ? d.idEvenement : undefined,
+                  titre: d.isConf
+                    ? ((t) => {
+                        console.log(t);
+                        console.log(_(t).startsWith("Film + "));
+                        if (_(t).startsWith("Film + ")) {
+                          return _.upperFirst(t.substring(7));
+                        } else {
+                          return t;
+                        }
+                      })(d.titre)
+                    : d.titre,
+                  // titre: d.titre,
+                  art: d.art || undefined,
                   realisateurs: d.realisateurs,
-                  duree: d.duree,
-                  version: d.version,
-                  isConf: d.isConf,
+                  typeConference: d.typeConference || undefined,
+                  annee: d.annee || undefined, // Normalement, toujours présent.
+                  duree: d.duree || undefined, // Normalement, toujours présent.
+                  version: d.version || undefined,
+                  format: d.format || undefined,
+                  // isConf: d.isConf,
                 };
               })
               .value(),
           };
         })
+        // Calcul d'un hash avec la composition de la séance (succession des films/conférences).
+        .map((seance) =>
+          _({})
+            .assign(seance, {
+              hashManifestation: _(seance.items)
+                .map((d) => (d.idFilm ? `f${d.idFilm}` : `c${d.idConf}`))
+                .value()
+                .join(""),
+            })
+            .value()
+        )
         .value()
     )
     .value();
@@ -265,10 +298,18 @@ try {
   await helpers.writeFileInFolder(
     `${basePath}/${progDirectoryName}`,
     "",
-    `${progDirectoryName}_CALENDAR.txt`,
-    doCalendar.taggedTextInDesign(rendered),
-    "latin1"
+    `${progDirectoryName}_CALENDAR.json`,
+    JSON.stringify(rendered, null, 2),
+    // doCalendar.taggedTextInDesign(rendered),
+    "utf8"
   );
+  // await helpers.writeFileInFolder(
+  //   `${basePath}/${progDirectoryName}`,
+  //   "",
+  //   `${progDirectoryName}_CALENDAR.txt`,
+  //   doCalendar.taggedTextInDesign(rendered),
+  //   "latin1"
+  // );
 
   process.exit(0);
 })();
