@@ -3,7 +3,6 @@
  * Génère le calendrier des séances du programme à partir des fichiers _MERGE_DEF.json de chaque cycle.
  */
 const _ = require("lodash");
-// const database = require("./lib/database");
 const helpers = require("./lib/helpers.js");
 const config = {
   access: require("./config/access.js"),
@@ -15,8 +14,6 @@ const queue = new PQueue({
 
 const doCalendar = require("./lib/transforms/calendar.js");
 const basePath = config.access.pathData.remote;
-// const pages = require("./lib/query/pages.js");
-// let evenementsPages;
 
 try {
   let args = helpers.extractArgsValue(process.argv.slice(2).join(" "));
@@ -34,33 +31,6 @@ try {
   );
 
   const progDirectoryName = helpers.getFullCode.prog(progConfig).join(" "); // Nom du répertoire du programme
-
-  // Tableau des IDs des catégories du programme.
-  // (Utilisé pour faire une requête sur Cinédoc pour obtenir le foliotage.)
-  // TODO: déplacer dans le rendu du calendrier papier ?
-  // let catsInProg = _(progConfig)
-  //   .thru((d) => {
-  //     return _(d.cycles)
-  //       .map((e) =>
-  //         _(e.sousCycles)
-  //           .map((f) => f.cats)
-  //           .value()
-  //       )
-  //       .value();
-  //   })
-  //   .flattenDeep()
-  //   .uniq()
-  //   .sort()
-  //   .value();
-
-  // TODO: déplacer dans le rendu du calendrier papier.
-  // try {
-  //   const db = await database.attach(config.access.db);
-  //   console.log("Connecté à la base de données.");
-  //   evenementsPages = await pages(db, catsInProg);
-  // } catch (e) {
-  //   console.log(e);
-  // }
 
   // On extrait un tableau contenant pour chaque cycle, le code de son répertoire et son nom ([["PROG99_CYCL460","Hugo Santiago"],...]).
   let o = _(progConfig.cycles)
@@ -130,14 +100,6 @@ try {
                 dateHeure: v[0].dateHeure,
                 idSalle: v[0].idSalle,
                 idEvenement: v[0].idEvenement,
-                // page: _(evenementsPages)
-                //   .thru((g) => {
-                //     let h = _(g).find(
-                //       (g) => g.idevenement === v[0].idEvenement
-                //     );
-                //     return h ? h.numeroPage : null;
-                //   })
-                //   .value(),
                 titreEvenement: v[0].titreEvenement,
                 typeEvenement: v[0].typeEvenement,
                 typeConference: v[0].typeConference,
@@ -149,7 +111,6 @@ try {
                         _.pick(w, [
                           "idFilm",
                           "idEvenement",
-                          // "titreEvenement",
                           "typeConference",
                           "titre",
                           "art",
