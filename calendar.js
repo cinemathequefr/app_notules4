@@ -201,41 +201,16 @@ try {
     .sortBy((v) => [v.dateHeure, v.idSalle[0]])
     .value();
 
-  // Filtrage des titres de cycles (à ajuster selon les besoins)
-  // TODO: déplacer dans le rendu du calendrier papier.
-  // o = _(o)
-  //   .map((d) =>
-  //     _({})
-  //       .assign(d, {
-  //         cycle: _(d.cycle)
-  //           .map((e) => {
-  //             if (e[0] === "Ciné-club de Frédéric Bonnaud") return [e[0]];
-  //             if (e[0] === "Séances Jeune public")
-  //               return ["Séance Jeune public", ""];
-  //             if (e[0] === "Séances spéciales") return ["Séance spéciale", ""];
-  //             if (e[0] === "Cinéma bis" || e[0] === "Aujourd'hui le cinéma")
-  //               return e;
-  //             return null; // Autres cass : on met cycle à null pour le retirer à l'étape suivante
-  //           })
-  //           .filter((e) => e !== null)
-  //           .value(),
-  //       })
-  //       .value()
-  //   )
-  //   .value();
-
-  // console.log(JSON.stringify(o, null, 2));
-
   // Formatage calendrier : regroupement par date.
-  const rendered = _(o)
+  const calendar = _(o)
     .groupBy((d) => d.dateHeure.substring(0, 10))
     .mapValues((day) =>
       _(day)
         .map((seance) => {
           return {
             idSeance: seance.idSeance,
-            dateHeure: seance.dateHeure, // On garde quand même ici `dateHeure`.
-            // heure: seance.dateHeure.substring(11, 16),
+            idEvenement: seance.idEvenement, // On garde `idEvenement` car il est nécessaire dans le rendu taggedTextInDesign pour le foliotage.
+            dateHeure: seance.dateHeure, // Bien que le regroupement soit fait sur la date, on garde ici la valeur dateHeure complète.
             salle: seance.idSalle[0],
             cycle: seance.cycle,
             titreSousCycle: seance.titreSousCycle,
@@ -269,13 +244,13 @@ try {
                   duree: d.duree || undefined, // Normalement, toujours présent.
                   version: d.version || undefined,
                   format: d.format || undefined,
-                  // isConf: d.isConf,
                 };
               })
               .value(),
           };
         })
         // Calcul d'un hash avec la composition de la séance (succession des films/conférences).
+        // Ce `hashEvenement` est plus fiable que `idEvenement` puisqu'il décrit précisément la composition de la séance.
         .map((seance) =>
           _({})
             .assign(seance, {
@@ -290,25 +265,23 @@ try {
     )
     .value();
 
-  // await helpers.writeFileInFolder(
-  //   `${basePath}/${progDirectoryName}`,
-  //   "",
-  //   `${progDirectoryName}_CALENDAR.json`,
-  //   JSON.stringify(rendered, null, 2),
-  //   "utf8"
-  // );
+  // Ecriture du calendrier JSON.
+  await helpers.writeFileInFolder(
+    `${basePath}/${progDirectoryName}`,
+    "",
+    `${progDirectoryName}_CALENDAR.json`,
+    JSON.stringify(calendar, null, 2),
+    "utf8"
+  );
 
-  // console.log(JSON.stringify(rendered, null, 2));
-
-  //TEST
-  await doCalendar.taggedTextInDesign(rendered, idProg);
-  // await helpers.writeFileInFolder(
-  //   `${basePath}/${progDirectoryName}`,
-  //   "",
-  //   `${progDirectoryName}_CALENDAR.txt`,
-  //   doCalendar.taggedTextInDesign(rendered),
-  //   "latin1"
-  // );
+  // Ecriture du calendrier Tagged
+  await helpers.writeFileInFolder(
+    `${basePath}/${progDirectoryName}`,
+    "",
+    `${progDirectoryName}_CALENDAR.txt`,
+    await doCalendar.taggedTextInDesign(calendar, idProg),
+    "latin1"
+  );
 
   process.exit(0);
 })();
