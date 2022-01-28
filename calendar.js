@@ -162,66 +162,55 @@ try {
     .sortBy((v) => [v.dateHeure, v.idSalle[0]])
     .value();
 
-  // Formatage calendrier : regroupement par date.
-  const calendar = _(o)
-    .groupBy((d) => d.dateHeure.substring(0, 10))
-    .mapValues((day) =>
-      _(day)
-        .map((seance) => {
-          return {
-            idSeance: seance.idSeance,
-            idEvenement: seance.idEvenement, // On garde `idEvenement` car il est nécessaire dans le rendu taggedTextInDesign pour le foliotage.
-            dateHeure: seance.dateHeure, // Bien que le regroupement soit fait sur la date, on garde ici la valeur dateHeure complète.
-            salle: seance.idSalle[0],
-            cycle: seance.cycle,
-            titreSousCycle: seance.titreSousCycle,
-            titreEvenement: seance.titreEvenement,
-            mention: seance.mention,
-            // page: seance.page,
-            items: _(seance.items)
-              .map((d) => {
-                return {
-                  idFilm: d.idFilm || undefined,
-                  idConf:
-                    d.isConf && _.isUndefined(d.idFilm)
-                      ? d.idEvenement
-                      : undefined,
-                  // idConf: d.isConf ? d.idEvenement : undefined,
-                  titre: d.isConf
-                    ? ((t) => {
-                        // Pour les titres d'items de type Action culturelle, retirer l'éventuel préfixe "Film + ".
-                        if (_(t).startsWith("Film + ")) {
-                          return _.upperFirst(t.substring(7));
-                        } else {
-                          return t;
-                        }
-                      })(d.titre)
-                    : d.titre,
-                  // titre: d.titre,
-                  art: d.art || undefined,
-                  realisateurs: d.realisateurs,
-                  typeConference: d.typeConference || undefined,
-                  annee: d.annee || undefined, // Normalement, toujours présent.
-                  duree: d.duree || undefined, // Normalement, toujours présent.
-                  version: d.version || undefined,
-                  format: d.format || undefined,
-                };
-              })
-              .value(),
-          };
-        })
-        // Calcul d'un hash avec la composition de la séance (succession des films/conférences).
-        // Ce `hashEvenement` est plus fiable que `idEvenement` puisqu'il décrit précisément la composition de la séance.
-        .map((seance) =>
-          _({})
-            .assign(seance, {
-              hashEvenement: _(seance.items)
-                .map((d) => (d.idFilm ? `f${d.idFilm}` : `c${d.idConf}`))
-                .value()
-                .join(""),
-            })
+  const seances = _(o)
+    .map((seance) => {
+      return {
+        idSeance: seance.idSeance,
+        idEvenement: seance.idEvenement, // On garde `idEvenement` car il est nécessaire dans le rendu taggedTextInDesign pour le foliotage.
+        dateHeure: seance.dateHeure, // Bien que le regroupement soit fait sur la date, on garde ici la valeur dateHeure complète.
+        salle: seance.idSalle[0],
+        cycle: seance.cycle,
+        titreSousCycle: seance.titreSousCycle,
+        titreEvenement: seance.titreEvenement,
+        mention: seance.mention,
+        items: _(seance.items)
+          .map((d) => {
+            return {
+              idFilm: d.idFilm || undefined,
+              idConf:
+                d.isConf && _.isUndefined(d.idFilm) ? d.idEvenement : undefined,
+              titre: d.isConf
+                ? ((t) => {
+                    // Pour les titres d'items de type Action culturelle, retirer l'éventuel préfixe "Film + ".
+                    if (_(t).startsWith("Film + ")) {
+                      return _.upperFirst(t.substring(7));
+                    } else {
+                      return t;
+                    }
+                  })(d.titre)
+                : d.titre,
+              art: d.art || undefined,
+              realisateurs: d.realisateurs,
+              typeConference: d.typeConference || undefined,
+              annee: d.annee || undefined, // Normalement, toujours présent.
+              duree: d.duree || undefined, // Normalement, toujours présent.
+              version: d.version || undefined,
+              format: d.format || undefined,
+            };
+          })
+          .value(),
+      };
+    })
+    // Calcul d'un hash avec la composition de la séance (succession des films/conférences).
+    // Ce `hashEvenement` est plus fiable que `idEvenement` puisqu'il décrit précisément la composition de la séance.
+    .map((seance) =>
+      _({})
+        .assign(seance, {
+          hashEvenement: _(seance.items)
+            .map((d) => (d.idFilm ? `f${d.idFilm}` : `c${d.idConf}`))
             .value()
-        )
+            .join(""),
+        })
         .value()
     )
     .value();
@@ -230,8 +219,8 @@ try {
   await helpers.writeFileInFolder(
     `${basePath}/${progDirectoryName}`,
     "",
-    `${progDirectoryName}_CALENDAR.json`,
-    JSON.stringify(calendar, null, 2),
+    `${progDirectoryName}_SEANCES.json`,
+    JSON.stringify(seances, null, 2),
     "utf8"
   );
 
@@ -240,7 +229,7 @@ try {
     `${basePath}/${progDirectoryName}`,
     "",
     `${progDirectoryName}_CALENDAR.txt`,
-    await doCalendar.taggedTextInDesign(calendar, idProg),
+    await doCalendar.taggedTextInDesign(seances, idProg),
     "latin1"
   );
 
