@@ -69,7 +69,7 @@ try {
       );
     } else {
       console.log(
-        "INFO : les catégories de ce cycle sont bien toutes déclarées dans le fichier de configuration du cycle."
+        "Les catégories de ce cycle sont bien toutes déclarées dans le fichier de configuration du cycle."
       );
     }
 
@@ -170,7 +170,9 @@ try {
       );
     }
     database.detach(db);
+    process.exit(0);
   } catch (e) {
     console.log(e);
+    process.exit(1);
   }
 })();
