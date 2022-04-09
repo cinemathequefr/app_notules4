@@ -12,7 +12,7 @@
     "html-minifier": "^4.0.0",
     "iconv-lite": "^0.5.0",
     "lodash": "^4.17.21",
-    "moment": "^2.23.0",
+    "moment": "^2.29.2",
     "node-firebird": "^0.8.6",
     "p-all": "^2.1.0",
     "p-queue": "^3.0.0",
