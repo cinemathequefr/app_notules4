@@ -215,14 +215,15 @@ try {
     )
     .value();
 
+  // NE PAS UTILISER. GENERER CE FICHIER AVEC app_notules4_2.
   // Ecriture du calendrier JSON.
-  await helpers.writeFileInFolder(
-    `${basePath}/${progDirectoryName}`,
-    "",
-    `${progDirectoryName}_SEANCES.json`,
-    JSON.stringify(seances, null, 2),
-    "utf8"
-  );
+  // await helpers.writeFileInFolder(
+  //   `${basePath}/${progDirectoryName}`,
+  //   "",
+  //   `${progDirectoryName}_SEANCES.json`,
+  //   JSON.stringify(seances, null, 2),
+  //   "utf8"
+  // );
 
   // Ecriture du calendrier Tagged
   await helpers.writeFileInFolder(
